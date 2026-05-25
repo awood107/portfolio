@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AJ Wood - Interactive Economic Dashboard and M&A Deal Stress-Testing Simulator. Modeling DSCR and LBO yields under interest rate regimes.">
+  <meta name="description" content="AJ Wood - Macroeconomic and Valuation Dashboard. Analyzing market cycle risk, valuation benchmarks, and dynamic monetary data with live FRED feeds.">
   <meta name="author" content="AJ Wood">
-  <title>AJ Wood | Macroeconomic & Stress-Testing Dashboard</title>
+  <title>AJ Wood | Macroeconomic & Valuation Dashboard</title>
   
   <!-- Favicon -->
   <link rel="icon" href="assets/logo.png" type="image/png">
@@ -13,157 +13,541 @@
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="styles.css">
   
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts: Outfit (modern headings) & Inter (body text) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Embedded Custom Dashboard Styling -->
+  <style>
+    :root {
+      /* Macro Color Accent Variables (Bridges designs) */
+      --accent-indigo: #6366f1;
+      --accent-indigo-light: #818cf8;
+      --accent-indigo-soft: rgba(99, 102, 241, 0.1);
+      --accent-indigo-glow: rgba(99, 102, 241, 0.15);
+      
+      --accent-emerald: #10b981;
+      --accent-emerald-soft: rgba(16, 185, 129, 0.1);
+      
+      --accent-rose: #f43f5e;
+      --accent-rose-soft: rgba(244, 63, 94, 0.1);
+      
+      --accent-amber: #f59e0b;
+      --accent-amber-soft: rgba(245, 158, 11, 0.1);
+      
+      --bg-glass: rgba(17, 24, 39, 0.75);
+      --bg-glass-hover: rgba(31, 41, 55, 0.85);
+      --shadow-glow: 0 0 20px 0 rgba(99, 102, 241, 0.12);
+    }
+
+    body {
+      font-family: var(--font-sans);
+    }
+
+    /* FRED settings block styling */
+    .fred-settings-panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 35px;
+      transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+      border-color: rgba(99, 102, 241, 0.22);
+    }
+    
+    .fred-settings-panel:hover {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.08);
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .fred-input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .fred-input {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 9px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      width: 250px;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .fred-input:focus {
+      border-color: var(--accent-indigo);
+      box-shadow: 0 0 8px rgba(99, 102, 241, 0.25);
+    }
+
+    /* Glass Cards styling */
+    .glass-card {
+      background-color: var(--bg-glass);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      transition: border-color var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-fast);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3), var(--shadow-glow);
+    }
+
+    .layout-panel {
+      padding: 24px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-header h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Badge styles */
+    .badge {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: inline-block;
+    }
+
+    .badge-indigo { background-color: var(--accent-indigo-soft); color: var(--accent-indigo-light); }
+    .badge-emerald { background-color: var(--accent-emerald-soft); color: var(--accent-emerald); }
+    .badge-rose { background-color: var(--accent-rose-soft); color: var(--accent-rose); }
+    .badge-warning { background-color: var(--accent-amber-soft); color: var(--accent-amber); }
+
+    /* Layout divisions */
+    .macro-overview-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 24px;
+      margin-bottom: 35px;
+    }
+
+    @media (max-width: 992px) {
+      .macro-overview-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .macro-indicators-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-bottom: 35px;
+    }
+
+    /* Indicator Cards */
+    .macro-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .macro-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      gap: 12px;
+    }
+
+    .macro-card-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .macro-card-value-group {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .macro-card-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      color: var(--text-primary);
+      line-height: 1.1;
+    }
+
+    .macro-card-unit {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .macro-card-previous {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .macro-card-sparkline-container {
+      height: 52px;
+      width: 100%;
+      margin-bottom: 16px;
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      padding: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .macro-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    .macro-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      font-size: 0.75rem;
+      margin-top: auto;
+    }
+
+    .macro-card-source {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .macro-card-link {
+      color: var(--accent-indigo-light);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color var(--transition-fast);
+    }
+
+    .macro-card-link:hover {
+      text-decoration: underline;
+      color: var(--accent-indigo);
+    }
+
+    .macro-card-link svg {
+      width: 11px;
+      height: 11px;
+      stroke: currentColor;
+    }
+
+    /* Dial Gauge styles */
+    .gauge-needle {
+      transform-origin: 100px 110px;
+      transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* Tooltip styles for Comparison Chart */
+    .macro-comparison-chart-card {
+      position: relative;
+    }
+
+    .macro-chart-tooltip {
+      position: absolute;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 200;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      opacity: 0;
+      transform: scale(0.95);
+      color: var(--text-primary);
+    }
+
+    .macro-chart-tooltip.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .macro-tooltip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    .macro-tooltip-val {
+      font-family: var(--font-display);
+      font-weight: 700;
+    }
+
+    /* Comparison selector form elements */
+    .compare-select-wrapper {
+      display: flex; 
+      gap: 16px; 
+      margin-bottom: 24px; 
+      flex-wrap: wrap; 
+      background: rgba(0, 0, 0, 0.2); 
+      padding: 16px 20px; 
+      border-radius: 12px; 
+      border: 1px solid var(--border-color);
+    }
+
+    .compare-select-group {
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+      min-width: 240px; 
+      flex: 1;
+    }
+
+    .compare-select-group label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .filter-select {
+      height: 38px;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 6px;
+      padding: 0 12px;
+      outline: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      margin: 0;
+      transition: border-color var(--transition-fast);
+    }
+
+    .filter-select:focus {
+      border-color: var(--accent-indigo);
+    }
+
+    /* Toasts Container */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--bg-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(20px);
+      opacity: 0;
+      pointer-events: auto;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast-success { border-left: 4px solid var(--accent-emerald); }
+    .toast-error { border-left: 4px solid var(--accent-rose); }
+    .toast-info { border-left: 4px solid var(--accent-indigo); }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .sync-icon-spinning {
+      animation: spin 1.2s linear infinite;
+    }
+  </style>
 </head>
 <body class="dashboard-body" style="background-color: var(--bg-primary);">
 
   <!-- Dashboard Container -->
-  <main class="dashboard-container">
+  <main class="dashboard-container" style="max-width: 1200px; margin: 0 auto; padding: 0 24px 60px 24px;">
     
     <!-- Top Header -->
-    <header class="dashboard-nav-header" style="position: static; height: auto; border: none; background: transparent; padding: 20px 0; margin-bottom: 20px;">
-      <a href="index.html#tech-work" class="back-link" style="text-decoration: none; color: var(--color-accent); font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <header class="dashboard-nav-header" style="position: static; height: auto; border: none; background: transparent; padding: 25px 0 10px 0; margin-bottom: 10px;">
+      <a href="index.html#tech-work" class="back-link" style="text-decoration: none; color: var(--color-accent); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: color var(--transition-fast);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back to Portfolio
       </a>
-    </main>
+    </header>
 
-    <div class="dashboard-header" style="margin-bottom: 40px;">
-      <span class="section-tag" style="display: block; margin-bottom: 8px;">Live Web Application</span>
-      <h1 class="section-title" style="font-size: 2.8rem; margin-bottom: 12px;">Macroeconomic & Valuation Dashboard</h1>
-      <p style="color: var(--text-secondary); max-width: 800px; font-size: 1.1rem; line-height: 1.6;">
-        An interactive development showcase visualizing macroeconomic variables and equity valuation benchmarks. Monitor systemic liquidity, yield curves, and historical asset-pricing indicators in real-time.
+    <div class="dashboard-header" style="margin-bottom: 30px;">
+      <span class="section-tag" style="display: block; margin-bottom: 8px;">Live Analytics Engine</span>
+      <h1 class="section-title" style="font-size: 2.8rem; margin-bottom: 12px; font-family: var(--font-display); font-weight: 800;">Macroeconomic & Valuation Dashboard</h1>
+      <p style="color: var(--text-secondary); max-width: 800px; font-size: 1.05rem; line-height: 1.6;">
+        An interactive diagnostics dashboard visualizing systemic monetary variables, yield curve inversions, and historical asset-pricing benchmarks. Connect your FRED key to pull real-time updates.
       </p>
     </div>
 
-    <!-- KPI Metric Cards Grid -->
-    <div class="kpi-grid">
-      <!-- KPI 1 -->
-      <div class="kpi-card">
-        <h3>Fed Funds Rate</h3>
-        <div class="kpi-number" id="kpi-fed-funds">5.25%</div>
-        <div class="kpi-change neutral">Central Bank Target</div>
+    <!-- FRED API Settings Panel -->
+    <div class="fred-settings-panel" id="fred-panel">
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <span class="badge badge-indigo" style="font-size: 10px; padding: 5px 12px;">FRED DATA CAPTURE</span>
+        <p style="font-size: 13px; color: var(--text-secondary); margin: 0;" id="fred-status-text">
+          Local cache is active. Enter a St. Louis Fed API key to pull live market feeds.
+        </p>
       </div>
-      <!-- KPI 2 -->
-      <div class="kpi-card">
-        <h3>10-Yr US Treasury</h3>
-        <div class="kpi-number" id="kpi-treasury">4.20%</div>
-        <div class="kpi-change neutral">Yield Benchmark</div>
-      </div>
-      <!-- KPI 3 -->
-      <div class="kpi-card">
-        <h3>CPI YoY Inflation</h3>
-        <div class="kpi-number">3.10%</div>
-        <div class="kpi-change negative">Core Fed Concern</div>
-      </div>
-      <!-- KPI 4 -->
-      <div class="kpi-card highlight">
-        <h3>Shiller PE Ratio</h3>
-        <div class="kpi-number" id="kpi-shiller">35.8x</div>
-        <div class="kpi-change negative" id="kpi-shiller-status">Mean: 17.1x (Elevated)</div>
+      <div class="fred-input-group">
+        <input type="password" id="fred-api-key" placeholder="FRED API Key (e.g. 4a5e...)" class="fred-input" />
+        <button class="btn btn-primary" id="btn-save-fred" style="padding: 0 16px; font-size: 13px; border-radius: 6px; margin: 0; height: 38px; width: auto; font-family: var(--font-sans); font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+          <svg class="sync-icon" id="sync-btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 14px; height: 14px; transition: transform 0.5s;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          <span id="sync-btn-text">Sync Live Feeds</span>
+        </button>
+        <button class="btn btn-secondary" id="btn-clear-fred" style="padding: 0 16px; font-size: 13px; border-radius: 6px; margin: 0; height: 38px; width: auto; font-family: var(--font-sans); font-weight: 600; display: none;">
+          Clear Key
+        </button>
       </div>
     </div>
 
-    <!-- Main Dashboard Grid -->
-    <div class="main-dashboard-grid">
+    <!-- Top Summary Layout: Gauge Dial & Analyst Summary -->
+    <div class="macro-overview-layout">
       
-      <!-- Left Column: Interactive Visualizations -->
-      <div class="dashboard-visuals">
-        <!-- Chart Panel 1 -->
-        <div class="chart-panel">
-          <h3>Fed Funds Target vs Inflation Rate (2016 – 2026)</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-            A historical timeline showing the Federal Reserve's rate hikes in response to CPI inflation fluctuations over the past decade.
-          </p>
-          <div style="position: relative; height: 320px; width: 100%;">
-            <canvas id="chart-macro"></canvas>
+      <!-- Recession Risk Gauge Card -->
+      <div class="glass-card layout-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <div class="panel-header" style="margin-bottom: 12px;">
+          <div>
+            <h3>Systemic Risk Gauge</h3>
+            <p class="panel-subtitle">Weighted mathematical recession & valuation risk scoring</p>
           </div>
         </div>
-
-        <!-- Chart Panel 2 -->
-        <div class="chart-panel">
-          <h3>Treasury Yield Curve Dynamics</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-            Plotting the 10-Year and 2-Year Treasury yields. Shows historical spreads and inversion indicators.
-          </p>
-          <div style="position: relative; height: 320px; width: 100%;">
-            <canvas id="chart-yields"></canvas>
-          </div>
+        <div id="macro-risk-gauge-container" style="display: flex; justify-content: center; align-items: center; position: relative; height: 140px; margin-top: 10px;">
+          <!-- SVG dial injected dynamically -->
+        </div>
+        <div style="text-align: center; margin-top: 12px;">
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700;">Aggregate Risk Level</div>
+          <div id="macro-risk-score-val" style="font-size: 32px; font-weight: 800; font-family: var(--font-display); color: var(--accent-rose); margin-top: 4px;">--%</div>
         </div>
       </div>
 
-      <!-- Right Column: Economic Indicators Panel -->
-      <div class="dashboard-sidebar">
-        <div class="indicators-panel">
-          <h3 class="indicators-title" style="font-family: var(--font-display); font-size: 1.4rem; color: var(--color-accent); margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-            Valuation & Monetary Metrics
-          </h3>
-          
-          <div class="indicators-list" style="display: flex; flex-direction: column; gap: 20px;">
-            
-            <!-- Indicator 1: Buffett Indicator -->
-            <div class="indicator-item-card">
-              <div class="indicator-header">
-                <span class="indicator-name">Buffett Indicator</span>
-                <span class="indicator-badge danger">192.4%</span>
-              </div>
-              <p class="indicator-desc">
-                Ratio of total US stock market capitalization (Wilshire 5000) to GDP. Sitting at +2.1 standard deviations above its historical trendline, representing a <strong>significantly overvalued</strong> market condition.
-              </p>
-            </div>
-
-            <!-- Indicator 2: Shiller PE (CAPE) -->
-            <div class="indicator-item-card">
-              <div class="indicator-header">
-                <span class="indicator-name">Shiller PE (CAPE Ratio)</span>
-                <span class="indicator-badge warning">35.8x</span>
-              </div>
-              <p class="indicator-desc">
-                Price-to-earnings ratio adjusted for inflation over the previous 10 years. Stands well above its historical mean of 17.1x, signaling highly <strong>elevated valuations</strong> across large-cap equities.
-              </p>
-            </div>
-
-            <!-- Indicator 3: M2 Money Supply -->
-            <div class="indicator-item-card">
-              <div class="indicator-header">
-                <span class="indicator-name">M2 Money Supply</span>
-                <span class="indicator-badge info">$21.05T</span>
-              </div>
-              <p class="indicator-desc">
-                A broad measure of currency, checking, savings, and money-market accounts. Showing a <strong>-1.2% contraction YoY</strong> as the Federal Reserve maintains quantitative tightening to curb systemic liquidity.
-              </p>
-            </div>
-
-            <!-- Indicator 4: 10Y-2Y Treasury Spread -->
-            <div class="indicator-item-card">
-              <div class="indicator-header">
-                <span class="indicator-name">10Y-2Y Treasury Spread</span>
-                <span class="indicator-badge warning">-0.10%</span>
-              </div>
-              <p class="indicator-desc">
-                The yield spread between 10-Year and 2-Year Treasury bonds. The spread remains <strong>inverted</strong>, representing restricted commercial bank lending margins and a strong historical recession signal.
-              </p>
-            </div>
-
-            <!-- Indicator 5: Federal Debt to GDP -->
-            <div class="indicator-item-card">
-              <div class="indicator-header">
-                <span class="indicator-name">Federal Debt to GDP</span>
-                <span class="indicator-badge neutral">122.3%</span>
-              </div>
-              <p class="indicator-desc">
-                Total outstanding public debt relative to annual US GDP. Measures national leverage and fiscal balance sheet capacity under elevated interest rate regimes.
-              </p>
-            </div>
-
+      <!-- Executive Analyst Summary Card -->
+      <div class="glass-card layout-panel" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 250px;">
+        <div class="panel-header" style="margin-bottom: 12px;">
+          <div>
+            <h3>Executive Macro Analyst Brief</h3>
+            <p class="panel-subtitle">Algorithmic risk evaluation based on dynamic monetary feeds</p>
           </div>
+          <span class="badge badge-indigo">Analyst Insights</span>
+        </div>
+        <div id="macro-analyst-summary-text" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; flex-grow: 1; display: flex; align-items: center; margin-bottom: 15px;">
+          <!-- Dynamically populated summary text -->
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; color: var(--accent-indigo);"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Indicator Matrix evaluated on: <span id="macro-eval-date" style="font-weight: 600; color: var(--text-secondary);">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Macro Indicators Grid -->
+    <div class="section-title-bar" style="margin-top: 30px; margin-bottom: 20px;">
+      <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">Macroeconomic & Valuation Diagnostics</h2>
+      <p style="color: var(--text-secondary); font-size: 0.95rem;">Key indicators reflecting monetary expansion rates, yield curves, labor markets, and stock valuation froths.</p>
+    </div>
+
+    <div class="macro-indicators-grid" id="macro-indicators-grid">
+      <!-- Grid Cards injected dynamically by JS -->
+    </div>
+
+    <!-- Interactive Comparison Playground Chart -->
+    <div class="glass-card layout-panel macro-comparison-chart-card" style="margin-top: 30px;">
+      <div class="panel-header" style="border-bottom: none; margin-bottom: 16px;">
+        <div>
+          <h3>Interactive Macro Correlation Playground</h3>
+          <p class="panel-subtitle">Select two indicators to overlay and visualize their historical co-movements on a dual-axis SVG plot</p>
+        </div>
+        <span class="badge badge-emerald">Comparison View</span>
+      </div>
+
+      <!-- Controls for Comparison -->
+      <div class="compare-select-wrapper">
+        <div class="compare-select-group">
+          <label for="macro-compare-primary">Primary Variable (Left Axis - Purple)</label>
+          <select id="macro-compare-primary" class="filter-select">
+            <!-- Options injected dynamically -->
+          </select>
+        </div>
+        <div class="compare-select-group">
+          <label for="macro-compare-secondary">Secondary Variable (Right Axis - Green)</label>
+          <select id="macro-compare-secondary" class="filter-select">
+            <!-- Options injected dynamically -->
+          </select>
         </div>
       </div>
 
+      <!-- Dual-Axis SVG Chart Container -->
+      <div id="macro-comparison-chart-container" style="height: 330px; width: 100%; position: relative;">
+        <!-- SVG Chart injected dynamically by JS -->
+      </div>
     </div>
 
   </main>
+
+  <!-- Floating Toast Notifications -->
+  <div class="toast-container" id="toast-container"></div>
 
   <!-- JavaScript -->
   <script src="dashboard-script.js"></script>

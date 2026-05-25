@@ -150,6 +150,21 @@ function initContactForm() {
     const emailInput = document.getElementById('form-email');
     const messageInput = document.getElementById('form-message');
     const submitBtn = document.getElementById('btn-submit');
+    const honeyInput = form.querySelector('input[name="_honey"]');
+
+    // Honeypot spam checking
+    if (honeyInput && honeyInput.value) {
+      // Spam bot filled this hidden field - simulate success silently to fool the bot
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending Message...';
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
+        showFeedback('Thank you! Your message has been sent successfully.', 'success');
+        form.reset();
+      }, 1000);
+      return;
+    }
 
     if (!nameInput.value.trim() || !emailInput.value.trim() || !messageInput.value.trim()) {
       showFeedback('Please fill out all fields.', 'error');
@@ -161,16 +176,52 @@ function initContactForm() {
       return;
     }
 
-    // Submit Simulation
+    // Active AJAX Submit to FormSubmit.co
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending Message...';
-    
-    setTimeout(() => {
+
+    fetch("https://formsubmit.co/ajax/awood107@gmail.com", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        name: nameInput.value,
+        email: emailInput.value,
+        message: messageInput.value,
+        _subject: `New Portfolio Message from ${nameInput.value}`,
+        _captcha: "false"
+      })
+    })
+    .then(response => {
       submitBtn.disabled = false;
       submitBtn.textContent = 'Send Message';
-      showFeedback('Thank you, AJ! Your message has been sent successfully.', 'success');
-      form.reset();
-    }, 1500);
+      
+      return response.json().then(data => {
+        if (response.ok) {
+          showFeedback('Thank you! Your message has been sent successfully. Please check your inbox for an activation email if this is your first submission.', 'success');
+          form.reset();
+        } else {
+          // Display the specific message from FormSubmit (e.g. if email activation is pending)
+          const errorMsg = data.message || 'Oops! Something went wrong on the server. Please try again.';
+          showFeedback(errorMsg, 'error');
+        }
+      }).catch(() => {
+        // Fallback if parsing JSON fails
+        if (response.ok) {
+          showFeedback('Thank you! Your message has been sent successfully.', 'success');
+          form.reset();
+        } else {
+          showFeedback('Oops! Something went wrong on the server. Please try again.', 'error');
+        }
+      });
+    })
+    .catch(error => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Message';
+      showFeedback('Oops! Network error. Please check your connection and try again.', 'error');
+    });
   });
 
   function validateEmail(email) {
