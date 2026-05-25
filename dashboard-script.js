@@ -1,12 +1,10 @@
 /**
  * AJ Wood Portfolio - Economic Dashboard Script
- * Implements interactive LBO Debt Stress-Testing calculations
- * and renders premium styled Chart.js macroeconomic timeline charts.
+ * Renders premium styled Chart.js macroeconomic timeline charts.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
   initMacroCharts();
-  initLboSimulator();
 });
 
 /**
@@ -146,113 +144,4 @@ function initMacroCharts() {
       }
     }
   });
-}
-
-/**
- * Handles slider listening and live math rendering for LBO Debt Stress Testing
- */
-function initLboSimulator() {
-  // Input sliders
-  const slideEv = document.getElementById('slide-ev');
-  const slideEbitda = document.getElementById('slide-ebitda');
-  const slideDebt = document.getElementById('slide-debt');
-  const slideSpread = document.getElementById('slide-spread');
-  const slideTreasury = document.getElementById('slide-treasury');
-
-  // Input numeric display panels
-  const valEv = document.getElementById('val-ev');
-  const valEbitda = document.getElementById('val-ebitda');
-  const valDebt = document.getElementById('val-debt');
-  const valSpread = document.getElementById('val-spread');
-  const valTreasury = document.getElementById('val-treasury');
-
-  // Calculation output panels
-  const resDebtAmt = document.getElementById('res-debt-amt');
-  const resInterestRate = document.getElementById('res-interest-rate');
-  const resAnnualInterest = document.getElementById('res-annual-interest');
-  const resDscrCalc = document.getElementById('res-dscr-calc');
-  const dealStatusBadge = document.getElementById('deal-status-badge');
-
-  // Top KPI elements
-  const kpiTreasury = document.getElementById('kpi-treasury');
-  const kpiFedFunds = document.getElementById('kpi-fed-funds');
-  const kpiDscr = document.getElementById('kpi-dscr');
-  const kpiDscrStatus = document.getElementById('kpi-dscr-status');
-
-  if (!slideEv || !slideEbitda || !slideDebt || !slideSpread || !slideTreasury) return;
-
-  function calculateStressTest() {
-    // Collect slider inputs
-    const ev = parseFloat(slideEv.value);
-    const ebitda = parseFloat(slideEbitda.value);
-    const debtPct = parseFloat(slideDebt.value);
-    const spread = parseFloat(slideSpread.value);
-    const treasuryVal = parseFloat(slideTreasury.value);
-
-    // Update input display labels
-    valEv.textContent = `$${ev.toFixed(1)}M`;
-    valEbitda.textContent = `$${ebitda.toFixed(1)}M`;
-    valDebt.textContent = `${debtPct}%`;
-    valSpread.textContent = `+${spread.toFixed(2)}%`;
-    valTreasury.textContent = `${treasuryVal.toFixed(2)}%`;
-
-    // Calculations
-    const debtAmt = ev * (debtPct / 100);
-    const allInInterestRate = treasuryVal + spread;
-    const annualInterest = debtAmt * (allInInterestRate / 100);
-    
-    // DSCR = EBITDA / Interest payment
-    let dscr = 99.9;
-    if (annualInterest > 0) {
-      dscr = ebitda / annualInterest;
-    }
-
-    // Format output strings
-    resDebtAmt.textContent = `$${debtAmt.toFixed(2)}M`;
-    resInterestRate.textContent = `${allInInterestRate.toFixed(2)}%`;
-    resAnnualInterest.textContent = `$${(annualInterest * 1000).toFixed(0)}k`;
-    resDscrCalc.textContent = dscr >= 99.9 ? '99.9x' : `${dscr.toFixed(2)}x`;
-
-    // Update Top KPIs
-    kpiTreasury.textContent = `${treasuryVal.toFixed(2)}%`;
-    kpiDscr.textContent = dscr >= 99.9 ? '99.9x' : `${dscr.toFixed(2)}x`;
-    
-    // Dynamic Fed Funds Rate KPI tied to Treasury movements (historical correlation proxy)
-    const simulatedFedFunds = Math.max(0, treasuryVal + 1.05);
-    kpiFedFunds.textContent = `${simulatedFedFunds.toFixed(2)}%`;
-
-    // Reset status classes
-    dealStatusBadge.className = 'status-indicator';
-    kpiDscrStatus.className = 'kpi-change';
-
-    // Status warning rules
-    if (dscr >= 1.50) {
-      dealStatusBadge.textContent = 'INVESTABLE (Target DSCR Safe)';
-      dealStatusBadge.classList.add('success');
-      kpiDscrStatus.textContent = 'Target Safe (>1.5x)';
-      kpiDscrStatus.classList.add('positive');
-      kpiDscr.style.color = '#c5a880';
-    } else if (dscr >= 1.25) {
-      dealStatusBadge.textContent = 'LEVERAGED WARNING (Tight Coverage)';
-      dealStatusBadge.classList.add('warning');
-      kpiDscrStatus.textContent = 'Tight Spreads (1.25x-1.5x)';
-      kpiDscrStatus.classList.add('neutral');
-      kpiDscr.style.color = '#f59e0b';
-    } else {
-      dealStatusBadge.textContent = 'DISTRESSED DEBT (Default Risk)';
-      dealStatusBadge.classList.add('danger');
-      kpiDscrStatus.textContent = 'Under Minimum Limit (<1.25x)';
-      kpiDscrStatus.classList.add('negative');
-      kpiDscr.style.color = '#ef4444';
-    }
-  }
-
-  // Bind Event Listeners
-  const sliders = [slideEv, slideEbitda, slideDebt, slideSpread, slideTreasury];
-  sliders.forEach(slider => {
-    slider.addEventListener('input', calculateStressTest);
-  });
-
-  // Run initial calculation on load
-  calculateStressTest();
 }

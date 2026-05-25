@@ -31,9 +31,9 @@
 
     <div class="dashboard-header" style="margin-bottom: 40px;">
       <span class="section-tag" style="display: block; margin-bottom: 8px;">Live Web Application</span>
-      <h1 class="section-title" style="font-size: 2.8rem; margin-bottom: 12px;">Macroeconomic & Stress-Testing Dashboard</h1>
+      <h1 class="section-title" style="font-size: 2.8rem; margin-bottom: 12px;">Macroeconomic & Valuation Dashboard</h1>
       <p style="color: var(--text-secondary); max-width: 800px; font-size: 1.1rem; line-height: 1.6;">
-        An interactive development showcase connecting macroeconomic variables to middle-market capital allocations. Underwrite acquisitions in real-time, adjust monetary rates, and Stress Test Leveraged Buyout (LBO) metrics.
+        An interactive development showcase visualizing macroeconomic variables and equity valuation benchmarks. Monitor systemic liquidity, yield curves, and historical asset-pricing indicators in real-time.
       </p>
     </div>
 
@@ -59,9 +59,9 @@
       </div>
       <!-- KPI 4 -->
       <div class="kpi-card highlight">
-        <h3>Simulated DSCR</h3>
-        <div class="kpi-number" id="kpi-dscr">2.43x</div>
-        <div class="kpi-change positive" id="kpi-dscr-status">Target Safe (>1.25x)</div>
+        <h3>Shiller PE Ratio</h3>
+        <div class="kpi-number" id="kpi-shiller">35.8x</div>
+        <div class="kpi-change negative" id="kpi-shiller-status">Mean: 17.1x (Elevated)</div>
       </div>
     </div>
 
@@ -93,92 +93,71 @@
         </div>
       </div>
 
-      <!-- Right Column: Deal Simulator -->
+      <!-- Right Column: Economic Indicators Panel -->
       <div class="dashboard-sidebar">
-        <div class="simulator-panel">
-          <h3 class="simulator-title" style="font-family: var(--font-display); font-size: 1.4rem; color: var(--color-accent); margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-            LBO Debt Stress-Test Simulator
+        <div class="indicators-panel">
+          <h3 class="indicators-title" style="font-family: var(--font-display); font-size: 1.4rem; color: var(--color-accent); margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            Valuation & Monetary Metrics
           </h3>
           
-          <div class="simulator-inputs">
-            <!-- EV Slider -->
-            <div class="slider-group">
-              <div class="slider-label">
-                <label for="slide-ev">Enterprise Value (EV)</label>
-                <span id="val-ev">$10.0M</span>
-              </div>
-              <input type="range" id="slide-ev" min="2" max="30" step="0.5" value="10">
-            </div>
-
-            <!-- EBITDA Slider -->
-            <div class="slider-group">
-              <div class="slider-label">
-                <label for="slide-ebitda">Target EBITDA</label>
-                <span id="val-ebitda">$1.8M</span>
-              </div>
-              <input type="range" id="slide-ebitda" min="0.3" max="5" step="0.1" value="1.8">
-            </div>
-
-            <!-- Debt Proportion Slider -->
-            <div class="slider-group">
-              <div class="slider-label">
-                <label for="slide-debt">Leverage Proportion (Debt %)</label>
-                <span id="val-debt">60%</span>
-              </div>
-              <input type="range" id="slide-debt" min="10" max="85" step="5" value="60">
-            </div>
-
-            <!-- Spread Slider -->
-            <div class="slider-group">
-              <div class="slider-label">
-                <label for="slide-spread">Bank Spread over Treasury</label>
-                <span id="val-spread">+2.50%</span>
-              </div>
-              <input type="range" id="slide-spread" min="1.0" max="5.0" step="0.25" value="2.5">
-            </div>
-
-            <!-- Simulated 10-Yr Treasury Yield -->
-            <div class="slider-group">
-              <div class="slider-label">
-                <label for="slide-treasury">10-Yr Treasury Yield</label>
-                <span id="val-treasury">4.20%</span>
-              </div>
-              <input type="range" id="slide-treasury" min="1.0" max="8.0" step="0.1" value="4.2">
-            </div>
-          </div>
-
-          <!-- Simulation Outputs -->
-          <div class="results-card">
-            <h4 style="font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; color: var(--text-primary);">
-              Calculated Underwriting Metrics
-            </h4>
-            <div class="results-grid">
-              <div class="result-item">
-                <label>Total Debt Financed</label>
-                <span id="res-debt-amt">$6.00M</span>
-              </div>
-              <div class="result-item">
-                <label>Interest Rate (All-In)</label>
-                <span id="res-interest-rate" style="color: var(--color-tech);">6.70%</span>
-              </div>
-              <div class="result-item">
-                <label>Required Annual Interest</label>
-                <span id="res-annual-interest">$402k</span>
-              </div>
-              <div class="result-item">
-                <label>Calculated DSCR</label>
-                <span id="res-dscr-calc" style="font-weight: 700; color: var(--color-accent);">2.99x</span>
-              </div>
-            </div>
+          <div class="indicators-list" style="display: flex; flex-direction: column; gap: 20px;">
             
-            <div class="status-indicator success" id="deal-status-badge">
-              INVESTABLE (Target DSCR Safe)
+            <!-- Indicator 1: Buffett Indicator -->
+            <div class="indicator-item-card">
+              <div class="indicator-header">
+                <span class="indicator-name">Buffett Indicator</span>
+                <span class="indicator-badge danger">192.4%</span>
+              </div>
+              <p class="indicator-desc">
+                Ratio of total US stock market capitalization (Wilshire 5000) to GDP. Sitting at +2.1 standard deviations above its historical trendline, representing a <strong>significantly overvalued</strong> market condition.
+              </p>
             </div>
+
+            <!-- Indicator 2: Shiller PE (CAPE) -->
+            <div class="indicator-item-card">
+              <div class="indicator-header">
+                <span class="indicator-name">Shiller PE (CAPE Ratio)</span>
+                <span class="indicator-badge warning">35.8x</span>
+              </div>
+              <p class="indicator-desc">
+                Price-to-earnings ratio adjusted for inflation over the previous 10 years. Stands well above its historical mean of 17.1x, signaling highly <strong>elevated valuations</strong> across large-cap equities.
+              </p>
+            </div>
+
+            <!-- Indicator 3: M2 Money Supply -->
+            <div class="indicator-item-card">
+              <div class="indicator-header">
+                <span class="indicator-name">M2 Money Supply</span>
+                <span class="indicator-badge info">$21.05T</span>
+              </div>
+              <p class="indicator-desc">
+                A broad measure of currency, checking, savings, and money-market accounts. Showing a <strong>-1.2% contraction YoY</strong> as the Federal Reserve maintains quantitative tightening to curb systemic liquidity.
+              </p>
+            </div>
+
+            <!-- Indicator 4: 10Y-2Y Treasury Spread -->
+            <div class="indicator-item-card">
+              <div class="indicator-header">
+                <span class="indicator-name">10Y-2Y Treasury Spread</span>
+                <span class="indicator-badge warning">-0.10%</span>
+              </div>
+              <p class="indicator-desc">
+                The yield spread between 10-Year and 2-Year Treasury bonds. The spread remains <strong>inverted</strong>, representing restricted commercial bank lending margins and a strong historical recession signal.
+              </p>
+            </div>
+
+            <!-- Indicator 5: Federal Debt to GDP -->
+            <div class="indicator-item-card">
+              <div class="indicator-header">
+                <span class="indicator-name">Federal Debt to GDP</span>
+                <span class="indicator-badge neutral">122.3%</span>
+              </div>
+              <p class="indicator-desc">
+                Total outstanding public debt relative to annual US GDP. Measures national leverage and fiscal balance sheet capacity under elevated interest rate regimes.
+              </p>
+            </div>
+
           </div>
-          
-          <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-top: 20px;">
-            *DSCR (Debt Service Coverage Ratio) evaluates the target company's capacity to pay its interest obligation. Lenders typically mandate a minimum threshold of <strong>1.25x</strong> for security.
-          </p>
         </div>
       </div>
 
