@@ -197,6 +197,24 @@ function initNetworkCanvas() {
   let width = canvas.width = window.innerWidth;
   let height = canvas.height = window.innerHeight;
 
+  // Track mouse movements
+  const mouse = {
+    x: null,
+    y: null,
+    radius: 180 // Distance threshold for attraction
+  };
+
+  window.addEventListener('mousemove', (e) => {
+    // Account for header offset if needed, but since canvas is fixed/absolute at top, clientX/clientY works
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  window.addEventListener('mouseleave', () => {
+    mouse.x = null;
+    mouse.y = null;
+  });
+
   // Handle Resize
   window.addEventListener('resize', () => {
     width = canvas.width = window.innerWidth;
@@ -204,9 +222,8 @@ function initNetworkCanvas() {
   });
 
   const particles = [];
-  // Scale particle counts by screen size
-  const maxParticles = Math.min(60, Math.floor((width * height) / 22000));
-  const maxDistance = 140;
+  const maxParticles = Math.min(65, Math.floor((width * height) / 20000));
+  const maxDistance = 150; // Increased link threshold for fuller web
 
   // Particle class definition
   class Particle {
@@ -215,10 +232,37 @@ function initNetworkCanvas() {
       this.y = Math.random() * height;
       this.vx = (Math.random() - 0.5) * 0.4;
       this.vy = (Math.random() - 0.5) * 0.4;
-      this.radius = Math.random() * 2 + 1;
+      this.radius = Math.random() * 2.2 + 1.3; // Slightly larger for better visibility
     }
 
     update() {
+      // Gentle attraction steer towards mouse cursor
+      if (mouse.x !== null && mouse.y !== null) {
+        const dx = mouse.x - this.x;
+        const dy = mouse.y - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < mouse.radius) {
+          const force = (mouse.radius - dist) / mouse.radius;
+          // Apply vector acceleration pull
+          this.vx += (dx / dist) * force * 0.04;
+          this.vy += (dy / dist) * force * 0.04;
+        }
+      }
+
+      // Maintain velocity bounds to avoid stopping or accelerating infinitely
+      const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+      const maxSpeed = 1.1;
+      const minSpeed = 0.25;
+
+      if (speed > maxSpeed) {
+        this.vx = (this.vx / speed) * maxSpeed;
+        this.vy = (this.vy / speed) * maxSpeed;
+      } else if (speed < minSpeed) {
+        this.vx = (this.vx / speed) * minSpeed;
+        this.vy = (this.vy / speed) * minSpeed;
+      }
+
       this.x += this.vx;
       this.y += this.vy;
 
@@ -230,7 +274,7 @@ function initNetworkCanvas() {
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(197, 168, 128, 0.4)'; // Gold hue
+      ctx.fillStyle = 'rgba(197, 168, 128, 0.65)'; // Increased opacity for gold particles (was 0.4)
       ctx.fill();
     }
   }
@@ -258,12 +302,12 @@ function initNetworkCanvas() {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < maxDistance) {
-            const alpha = (1 - dist / maxDistance) * 0.12;
+            const alpha = (1 - dist / maxDistance) * 0.22; // Increased line opacity (was 0.12)
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`; // Blue line link
-            ctx.lineWidth = 1;
+            ctx.lineWidth = 1.2; // Slightly thicker lines for visibility
             ctx.stroke();
           }
         }
