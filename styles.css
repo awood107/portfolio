@@ -626,9 +626,11 @@ nav {
 }
 
 .timeline-body li {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   position: relative;
-  padding-left: 20px;
+  padding-left: 24px;
+  line-height: 1.65;
+  letter-spacing: -0.01em;
 }
 
 .timeline-body li::before {
