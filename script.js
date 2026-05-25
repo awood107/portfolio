@@ -324,7 +324,7 @@ function initProjectModals() {
             <li><strong>The Mechanics of Debt Amortization:</strong> Modeling compounding structures and interest coverage ratios under elevated inflation regimes.</li>
           </ul>
           <h4>Recent Drafts & Releases:</h4>
-          <p>Draft briefs are shared quarterly with private equity and investment groups. Formal submissions to corporate strategy reviews and financial publications are slated for Q3 2026.</p>
+          <p>Draft briefs are shared quarterly with private equity and investment groups. Formal submissions targeting publications like the Wall Street Journal are slated for Q3 2026.</p>
         </div>
       `
     },
