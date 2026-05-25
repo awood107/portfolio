@@ -446,22 +446,17 @@ document.addEventListener('DOMContentLoaded', () => {
       // Select random player
       const botName = botNames[Math.floor(Math.random() * botNames.length)];
       
-      // Perform draw (pencil edit or occasionally flood fill or erase)
+      // Perform draw (pencil edit or occasionally erase)
       const actionRand = Math.random();
       const randX = Math.floor(Math.random() * GRID_SIZE);
       const randY = Math.floor(Math.random() * GRID_SIZE);
 
-      if (actionRand < 0.08) {
-        // 8% chance to erase
+      if (actionRand < 0.06) {
+        // 6% chance to erase
         grid[randX][randY] = null;
         addLogEntry(botName, 'erased cell', { x: randX, y: randY });
-      } else if (actionRand < 0.15) {
-        // 7% chance to trigger BFS bucket fill
-        const color = colors[Math.floor(Math.random() * colors.length)].hex;
-        floodFill(randX, randY, color);
-        addLogEntry(botName, 'triggered flood fill', { x: randX, y: randY });
       } else {
-        // 85% chance to draw single pixel
+        // 94% chance to draw single pixel
         const color = colors[Math.floor(Math.random() * colors.length)].hex;
         grid[randX][randY] = color;
         addLogEntry(botName, 'painted pixel', { x: randX, y: randY });
