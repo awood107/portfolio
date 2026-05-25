@@ -432,6 +432,23 @@ function initProjectModals() {
     });
   }
 
+  const etlLinkTech = document.getElementById('link-tech-etl');
+  const mctsLinkTech = document.getElementById('link-tech-mcts');
+
+  if (etlLinkTech) {
+    etlLinkTech.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('etl');
+    });
+  }
+
+  if (mctsLinkTech) {
+    mctsLinkTech.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('amortization');
+    });
+  }
+
   modalClose.addEventListener('click', closeModal);
 
   // Close modal when clicking outside the content area

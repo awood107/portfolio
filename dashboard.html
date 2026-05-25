@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AJ Wood - Interactive Economic Dashboard and M&A Deal Stress-Testing Simulator. Modeling DSCR and LBO yields under interest rate regimes.">
+  <meta name="author" content="AJ Wood">
+  <title>AJ Wood | Macroeconomic & Stress-Testing Dashboard</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="assets/logo.png" type="image/png">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body" style="background-color: var(--bg-primary);">
+
+  <!-- Dashboard Container -->
+  <main class="dashboard-container">
+    
+    <!-- Top Header -->
+    <header class="dashboard-nav-header" style="position: static; height: auto; border: none; background: transparent; padding: 20px 0; margin-bottom: 20px;">
+      <a href="index.html#tech-work" class="back-link" style="text-decoration: none; color: var(--color-accent); font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Portfolio
+      </a>
+    </main>
+
+    <div class="dashboard-header" style="margin-bottom: 40px;">
+      <span class="section-tag" style="display: block; margin-bottom: 8px;">Live Web Application</span>
+      <h1 class="section-title" style="font-size: 2.8rem; margin-bottom: 12px;">Macroeconomic & Stress-Testing Dashboard</h1>
+      <p style="color: var(--text-secondary); max-width: 800px; font-size: 1.1rem; line-height: 1.6;">
+        An interactive development showcase connecting macroeconomic variables to middle-market capital allocations. Underwrite acquisitions in real-time, adjust monetary rates, and Stress Test Leveraged Buyout (LBO) metrics.
+      </p>
+    </div>
+
+    <!-- KPI Metric Cards Grid -->
+    <div class="kpi-grid">
+      <!-- KPI 1 -->
+      <div class="kpi-card">
+        <h3>Fed Funds Rate</h3>
+        <div class="kpi-number" id="kpi-fed-funds">5.25%</div>
+        <div class="kpi-change neutral">Central Bank Target</div>
+      </div>
+      <!-- KPI 2 -->
+      <div class="kpi-card">
+        <h3>10-Yr US Treasury</h3>
+        <div class="kpi-number" id="kpi-treasury">4.20%</div>
+        <div class="kpi-change neutral">Yield Benchmark</div>
+      </div>
+      <!-- KPI 3 -->
+      <div class="kpi-card">
+        <h3>CPI YoY Inflation</h3>
+        <div class="kpi-number">3.10%</div>
+        <div class="kpi-change negative">Core Fed Concern</div>
+      </div>
+      <!-- KPI 4 -->
+      <div class="kpi-card highlight">
+        <h3>Simulated DSCR</h3>
+        <div class="kpi-number" id="kpi-dscr">2.43x</div>
+        <div class="kpi-change positive" id="kpi-dscr-status">Target Safe (>1.25x)</div>
+      </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="main-dashboard-grid">
+      
+      <!-- Left Column: Interactive Visualizations -->
+      <div class="dashboard-visuals">
+        <!-- Chart Panel 1 -->
+        <div class="chart-panel">
+          <h3>Fed Funds Target vs Inflation Rate (2016 – 2026)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+            A historical timeline showing the Federal Reserve's rate hikes in response to CPI inflation fluctuations over the past decade.
+          </p>
+          <div style="position: relative; height: 320px; width: 100%;">
+            <canvas id="chart-macro"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart Panel 2 -->
+        <div class="chart-panel">
+          <h3>Treasury Yield Curve Dynamics</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+            Plotting the 10-Year and 2-Year Treasury yields. Shows historical spreads and inversion indicators.
+          </p>
+          <div style="position: relative; height: 320px; width: 100%;">
+            <canvas id="chart-yields"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Deal Simulator -->
+      <div class="dashboard-sidebar">
+        <div class="simulator-panel">
+          <h3 class="simulator-title" style="font-family: var(--font-display); font-size: 1.4rem; color: var(--color-accent); margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            LBO Debt Stress-Test Simulator
+          </h3>
+          
+          <div class="simulator-inputs">
+            <!-- EV Slider -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-ev">Enterprise Value (EV)</label>
+                <span id="val-ev">$10.0M</span>
+              </div>
+              <input type="range" id="slide-ev" min="2" max="30" step="0.5" value="10">
+            </div>
+
+            <!-- EBITDA Slider -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-ebitda">Target EBITDA</label>
+                <span id="val-ebitda">$1.8M</span>
+              </div>
+              <input type="range" id="slide-ebitda" min="0.3" max="5" step="0.1" value="1.8">
+            </div>
+
+            <!-- Debt Proportion Slider -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-debt">Leverage Proportion (Debt %)</label>
+                <span id="val-debt">60%</span>
+              </div>
+              <input type="range" id="slide-debt" min="10" max="85" step="5" value="60">
+            </div>
+
+            <!-- Spread Slider -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-spread">Bank Spread over Treasury</label>
+                <span id="val-spread">+2.50%</span>
+              </div>
+              <input type="range" id="slide-spread" min="1.0" max="5.0" step="0.25" value="2.5">
+            </div>
+
+            <!-- Simulated 10-Yr Treasury Yield -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-treasury">10-Yr Treasury Yield</label>
+                <span id="val-treasury">4.20%</span>
+              </div>
+              <input type="range" id="slide-treasury" min="1.0" max="8.0" step="0.1" value="4.2">
+            </div>
+          </div>
+
+          <!-- Simulation Outputs -->
+          <div class="results-card">
+            <h4 style="font-family: var(--font-display); font-size: 1.05rem; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px; color: var(--text-primary);">
+              Calculated Underwriting Metrics
+            </h4>
+            <div class="results-grid">
+              <div class="result-item">
+                <label>Total Debt Financed</label>
+                <span id="res-debt-amt">$6.00M</span>
+              </div>
+              <div class="result-item">
+                <label>Interest Rate (All-In)</label>
+                <span id="res-interest-rate" style="color: var(--color-tech);">6.70%</span>
+              </div>
+              <div class="result-item">
+                <label>Required Annual Interest</label>
+                <span id="res-annual-interest">$402k</span>
+              </div>
+              <div class="result-item">
+                <label>Calculated DSCR</label>
+                <span id="res-dscr-calc" style="font-weight: 700; color: var(--color-accent);">2.99x</span>
+              </div>
+            </div>
+            
+            <div class="status-indicator success" id="deal-status-badge">
+              INVESTABLE (Target DSCR Safe)
+            </div>
+          </div>
+          
+          <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-top: 20px;">
+            *DSCR (Debt Service Coverage Ratio) evaluates the target company's capacity to pay its interest obligation. Lenders typically mandate a minimum threshold of <strong>1.25x</strong> for security.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JavaScript -->
+  <script src="dashboard-script.js"></script>
+</body>
+</html>
