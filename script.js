@@ -230,9 +230,9 @@ function initNetworkCanvas() {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.vx = (Math.random() - 0.5) * 0.4;
-      this.vy = (Math.random() - 0.5) * 0.4;
-      this.radius = Math.random() * 2.2 + 1.3; // Slightly larger for better visibility
+      this.vx = (Math.random() - 0.5) * 0.22; // Slower baseline movement
+      this.vy = (Math.random() - 0.5) * 0.22;
+      this.radius = Math.random() * 2.2 + 1.3;
     }
 
     update() {
@@ -244,16 +244,16 @@ function initNetworkCanvas() {
         
         if (dist < mouse.radius) {
           const force = (mouse.radius - dist) / mouse.radius;
-          // Apply vector acceleration pull
-          this.vx += (dx / dist) * force * 0.04;
-          this.vy += (dy / dist) * force * 0.04;
+          // Apply vector acceleration pull (slower steer rate)
+          this.vx += (dx / dist) * force * 0.015;
+          this.vy += (dy / dist) * force * 0.015;
         }
       }
 
-      // Maintain velocity bounds to avoid stopping or accelerating infinitely
+      // Maintain velocity bounds to keep them slower with a strict cap
       const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-      const maxSpeed = 1.1;
-      const minSpeed = 0.25;
+      const maxSpeed = 0.55; // Strict cap (halved from 1.1)
+      const minSpeed = 0.12; // Slower min speed (was 0.25)
 
       if (speed > maxSpeed) {
         this.vx = (this.vx / speed) * maxSpeed;
@@ -274,7 +274,7 @@ function initNetworkCanvas() {
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(197, 168, 128, 0.65)'; // Increased opacity for gold particles (was 0.4)
+      ctx.fillStyle = 'rgba(248, 250, 252, 0.75)'; // Soft warm white (was gold)
       ctx.fill();
     }
   }
@@ -302,12 +302,12 @@ function initNetworkCanvas() {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < maxDistance) {
-            const alpha = (1 - dist / maxDistance) * 0.22; // Increased line opacity (was 0.12)
+            const alpha = (1 - dist / maxDistance) * 0.22;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`; // Blue line link
-            ctx.lineWidth = 1.2; // Slightly thicker lines for visibility
+            ctx.strokeStyle = `rgba(226, 232, 240, ${alpha})`; // Soft warm slate connections (was blue)
+            ctx.lineWidth = 1.1;
             ctx.stroke();
           }
         }
