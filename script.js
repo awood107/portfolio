@@ -201,11 +201,10 @@ function initNetworkCanvas() {
   const mouse = {
     x: null,
     y: null,
-    radius: 180 // Distance threshold for attraction
+    radius: 220 // Increased distance threshold for attraction and halo
   };
 
   window.addEventListener('mousemove', (e) => {
-    // Account for header offset if needed, but since canvas is fixed/absolute at top, clientX/clientY works
     mouse.x = e.clientX;
     mouse.y = e.clientY;
   });
@@ -223,20 +222,20 @@ function initNetworkCanvas() {
 
   const particles = [];
   const maxParticles = Math.min(65, Math.floor((width * height) / 20000));
-  const maxDistance = 150; // Increased link threshold for fuller web
+  const maxDistance = 150; 
 
   // Particle class definition
   class Particle {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.vx = (Math.random() - 0.5) * 0.22; // Slower baseline movement
-      this.vy = (Math.random() - 0.5) * 0.22;
+      this.vx = (Math.random() - 0.5) * 0.45; // Faster baseline movement (was 0.22)
+      this.vy = (Math.random() - 0.5) * 0.45;
       this.radius = Math.random() * 2.2 + 1.3;
     }
 
     update() {
-      // Gentle attraction steer towards mouse cursor
+      // Steer towards mouse cursor (stronger attraction coefficient)
       if (mouse.x !== null && mouse.y !== null) {
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
@@ -244,16 +243,16 @@ function initNetworkCanvas() {
         
         if (dist < mouse.radius) {
           const force = (mouse.radius - dist) / mouse.radius;
-          // Apply vector acceleration pull (slower steer rate)
-          this.vx += (dx / dist) * force * 0.015;
-          this.vy += (dy / dist) * force * 0.015;
+          // Apply vector acceleration pull (faster steer rate, was 0.015)
+          this.vx += (dx / dist) * force * 0.08;
+          this.vy += (dy / dist) * force * 0.08;
         }
       }
 
-      // Maintain velocity bounds to keep them slower with a strict cap
+      // Maintain velocity bounds to keep them moving dynamically with a cap
       const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-      const maxSpeed = 0.55; // Strict cap (halved from 1.1)
-      const minSpeed = 0.12; // Slower min speed (was 0.25)
+      const maxSpeed = 1.6; // Increased speed cap for visible attraction (was 0.55)
+      const minSpeed = 0.35; // Slower min speed threshold to keep moving (was 0.12)
 
       if (speed > maxSpeed) {
         this.vx = (this.vx / speed) * maxSpeed;
@@ -274,7 +273,7 @@ function initNetworkCanvas() {
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(248, 250, 252, 0.75)'; // Soft warm white (was gold)
+      ctx.fillStyle = 'rgba(248, 250, 252, 0.8)'; // Warm slate white (was 0.75)
       ctx.fill();
     }
   }
@@ -290,6 +289,25 @@ function initNetworkCanvas() {
 
     // Stop animating if user has scrolled past hero section to save resources
     if (window.scrollY < height) {
+      // Draw cursor spotlight halo glow if mouse is active
+      if (mouse.x !== null && mouse.y !== null) {
+        ctx.beginPath();
+        const glowGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, mouse.radius);
+        glowGrad.addColorStop(0, 'rgba(197, 168, 128, 0.16)'); // Champagne gold glow
+        glowGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.05)'); // Slate blue glow
+        glowGrad.addColorStop(1, 'rgba(11, 15, 25, 0)'); // Fade to transparent
+        ctx.fillStyle = glowGrad;
+        ctx.arc(mouse.x, mouse.y, mouse.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Faint border ring around the halo spotlight
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, mouse.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(197, 168, 128, 0.04)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
       for (let i = 0; i < particles.length; i++) {
         const p1 = particles[i];
         p1.update();
@@ -302,11 +320,21 @@ function initNetworkCanvas() {
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < maxDistance) {
-            const alpha = (1 - dist / maxDistance) * 0.22;
+            let connectionOpacity = (1 - dist / maxDistance) * 0.22;
+            
+            // Draw connections slightly brighter if both endpoints are within cursor halo
+            if (mouse.x !== null && mouse.y !== null) {
+              const m1 = Math.sqrt(Math.pow(mouse.x - p1.x, 2) + Math.pow(mouse.y - p1.y, 2));
+              const m2 = Math.sqrt(Math.pow(mouse.x - p2.x, 2) + Math.pow(mouse.y - p2.y, 2));
+              if (m1 < mouse.radius && m2 < mouse.radius) {
+                connectionOpacity *= 1.6; // Scale up line brightness inside halo
+              }
+            }
+
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(226, 232, 240, ${alpha})`; // Soft warm slate connections (was blue)
+            ctx.strokeStyle = `rgba(226, 232, 240, ${connectionOpacity})`;
             ctx.lineWidth = 1.1;
             ctx.stroke();
           }
