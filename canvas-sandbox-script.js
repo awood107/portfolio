@@ -47,53 +47,101 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Faction template coordinate offsets relative to a center point
   const SPARTAN_HELMET = [
-    // Plume (Green: #00a368)
-    { dx: 0, dy: -5, color: '#00a368' },
+    // Row -5 (dy = -5)
     { dx: -1, dy: -5, color: '#00a368' },
+    { dx: 0, dy: -5, color: '#00a368' },
     { dx: 1, dy: -5, color: '#00a368' },
+    { dx: 2, dy: -5, color: '#00a368' },
+    { dx: 3, dy: -5, color: '#00a368' },
+
+    // Row -4 (dy = -4)
+    { dx: -3, dy: -4, color: '#00a368' },
     { dx: -2, dy: -4, color: '#00a368' },
     { dx: -1, dy: -4, color: '#00a368' },
     { dx: 0, dy: -4, color: '#00a368' },
     { dx: 1, dy: -4, color: '#00a368' },
     { dx: 2, dy: -4, color: '#00a368' },
+    { dx: 3, dy: -4, color: '#00a368' },
+    { dx: 4, dy: -4, color: '#00a368' },
+
+    // Row -3 (dy = -3)
+    { dx: -4, dy: -3, color: '#00a368' },
     { dx: -3, dy: -3, color: '#00a368' },
-    { dx: -2, dy: -3, color: '#00a368' },
-    { dx: -1, dy: -3, color: '#00a368' },
-    { dx: 0, dy: -3, color: '#00a368' },
-    { dx: 1, dy: -3, color: '#00a368' },
-    { dx: 2, dy: -3, color: '#00a368' },
-    { dx: 3, dy: -3, color: '#00a368' },
-    
-    // Helmet Body (White: #ffffff)
-    { dx: -2, dy: -2, color: '#ffffff' },
-    { dx: -1, dy: -2, color: '#ffffff' },
-    { dx: 0, dy: -2, color: '#ffffff' },
-    { dx: 1, dy: -2, color: '#ffffff' },
-    { dx: 2, dy: -2, color: '#ffffff' },
-    
-    { dx: -3, dy: -1, color: '#ffffff' },
+    { dx: -2, dy: -3, color: '#ffffff' }, // White line separator
+    { dx: -1, dy: -3, color: '#ffffff' },
+    { dx: 0, dy: -3, color: '#ffffff' },
+    { dx: 1, dy: -3, color: '#ffffff' },
+    { dx: 2, dy: -3, color: '#ffffff' },
+    { dx: 3, dy: -3, color: '#ffffff' },
+    { dx: 4, dy: -3, color: '#00a368' },
+
+    // Row -2 (dy = -2)
+    { dx: -4, dy: -2, color: '#00a368' },
+    { dx: -3, dy: -2, color: '#00a368' }, // Plume bar
+    { dx: -2, dy: -2, color: '#ffffff' }, // Gap
+    { dx: -1, dy: -2, color: '#00a368' }, // Plume bar
+    { dx: 0, dy: -2, color: '#ffffff' },  // Gap
+    { dx: 1, dy: -2, color: '#00a368' },  // Plume bar
+    { dx: 2, dy: -2, color: '#ffffff' },  // Gap
+    { dx: 3, dy: -2, color: '#00a368' },  // Plume bar
+    { dx: 4, dy: -2, color: '#00a368' },  // Helmet top
+
+    // Row -1 (dy = -1)
+    { dx: -4, dy: -1, color: '#00a368' },
+    { dx: -3, dy: -1, color: '#ffffff' }, // White line
     { dx: -2, dy: -1, color: '#ffffff' },
-    { dx: -1, dy: -1, color: '#ffffff' },
-    { dx: 0, dy: -1, color: '#ffffff' },
-    { dx: 1, dy: -1, color: '#ffffff' },
-    { dx: 2, dy: -1, color: '#ffffff' },
-    { dx: 3, dy: -1, color: '#ffffff' },
-    
-    { dx: -3, dy: 0, color: '#ffffff' },
-    { dx: -2, dy: 0, color: '#ffffff' }, // eye slot (dx -1 is empty)
-    { dx: 0, dy: 0, color: '#ffffff' },  // nose guard
-    { dx: 2, dy: 0, color: '#ffffff' },  // eye slot (dx 1 is empty)
-    { dx: 3, dy: 0, color: '#ffffff' },
-    
+    { dx: -1, dy: -1, color: '#00a368' }, // Helmet dome starts
+    { dx: 0, dy: -1, color: '#00a368' },
+    { dx: 1, dy: -1, color: '#00a368' },
+    { dx: 2, dy: -1, color: '#00a368' },
+    { dx: 3, dy: -1, color: '#00a368' },
+
+    // Row 0 (dy = 0)
+    { dx: -4, dy: 0, color: '#00a368' }, // Plume tail
+    { dx: -3, dy: 0, color: '#ffffff' }, // White space
+    { dx: -2, dy: 0, color: '#00a368' }, // Helmet dome
+    { dx: -1, dy: 0, color: '#00a368' },
+    { dx: 0, dy: 0, color: '#00a368' },
+    { dx: 1, dy: 0, color: '#00a368' },
+    { dx: 2, dy: 0, color: '#00a368' },
+    { dx: 3, dy: 0, color: '#00a368' },
+
+    // Row 1 (dy = 1)
+    { dx: -4, dy: 1, color: '#00a368' }, // Plume tail
     { dx: -3, dy: 1, color: '#ffffff' },
-    { dx: -2, dy: 1, color: '#ffffff' },
-    { dx: 0, dy: 1, color: '#ffffff' },  // nose guard
-    { dx: 2, dy: 1, color: '#ffffff' },
-    { dx: 3, dy: 1, color: '#ffffff' },
-    
+    { dx: -2, dy: 1, color: '#00a368' }, // Helmet face
+    { dx: -1, dy: 1, color: '#00a368' },
+    { dx: 0, dy: 1, color: '#00a368' },
+    { dx: 1, dy: 1, color: '#00a368' },
+    { dx: 2, dy: 1, color: '#00a368' },
+    { dx: 3, dy: 1, color: '#ffffff' }, // White eye cutout
+    { dx: 4, dy: 1, color: '#ffffff' }, // White eye cutout
+    { dx: 5, dy: 1, color: '#00a368' }, // Nose guard tip
+
+    // Row 2 (dy = 2)
+    { dx: -4, dy: 2, color: '#00a368' }, // Plume tail
     { dx: -3, dy: 2, color: '#ffffff' },
-    { dx: 0, dy: 2, color: '#ffffff' },  // nose guard
-    { dx: 3, dy: 2, color: '#ffffff' }
+    { dx: -2, dy: 2, color: '#00a368' }, // Helmet lower
+    { dx: -1, dy: 2, color: '#00a368' },
+    { dx: 0, dy: 2, color: '#00a368' },
+    { dx: 1, dy: 2, color: '#00a368' },
+    { dx: 2, dy: 2, color: '#ffffff' }, // Eye slot back
+    { dx: 3, dy: 2, color: '#00a368' }, // Jaw guard top
+    { dx: 4, dy: 2, color: '#00a368' },
+
+    // Row 3 (dy = 3)
+    { dx: -4, dy: 3, color: '#00a368' }, // Plume tail tip
+    { dx: -2, dy: 3, color: '#00a368' }, // Helmet bottom
+    { dx: -1, dy: 3, color: '#00a368' },
+    { dx: 0, dy: 3, color: '#00a368' },
+    { dx: 1, dy: 3, color: '#00a368' },
+    { dx: 3, dy: 3, color: '#00a368' }, // Jaw guard tip
+    { dx: 4, dy: 3, color: '#00a368' },
+
+    // Row 4 (dy = 4)
+    { dx: -2, dy: 4, color: '#00a368' }, // Helmet neck curve
+    { dx: -1, dy: 4, color: '#00a368' },
+    { dx: 0, dy: 4, color: '#00a368' }
   ];
 
   const VOID_TEMPLATE = [
@@ -241,6 +289,67 @@ document.addEventListener('DOMContentLoaded', () => {
     { dx: 2, dy: 3, color: '#ff4500' },
     { dx: 3, dy: 3, color: '#ff4500' },
     { dx: 4, dy: 3, color: '#ff4500' }
+  ];
+
+  const MICHIGAN_MITTEN = [
+    // Top fingers (Row -4)
+    { dx: 0, dy: -4, color: '#3690ea' },
+    { dx: 1, dy: -4, color: '#3690ea' },
+    
+    // Row -3
+    { dx: -1, dy: -3, color: '#3690ea' },
+    { dx: 0, dy: -3, color: '#3690ea' },
+    { dx: 1, dy: -3, color: '#3690ea' },
+    
+    // Row -2
+    { dx: -1, dy: -2, color: '#3690ea' },
+    { dx: 0, dy: -2, color: '#3690ea' },
+    { dx: 1, dy: -2, color: '#3690ea' },
+    { dx: 2, dy: -2, color: '#3690ea' },
+    
+    // Thumb starts (Row -1)
+    { dx: -3, dy: -1, color: '#3690ea' }, // Thumb tip
+    { dx: -2, dy: -1, color: '#3690ea' },
+    { dx: -1, dy: -1, color: '#3690ea' },
+    { dx: 0, dy: -1, color: '#3690ea' },
+    { dx: 1, dy: -1, color: '#3690ea' },
+    { dx: 2, dy: -1, color: '#3690ea' },
+    
+    // Row 0
+    { dx: -3, dy: 0, color: '#3690ea' },
+    { dx: -2, dy: 0, color: '#3690ea' },
+    { dx: -1, dy: 0, color: '#3690ea' },
+    { dx: 0, dy: 0, color: '#3690ea' },
+    { dx: 1, dy: 0, color: '#3690ea' },
+    { dx: 2, dy: 0, color: '#3690ea' },
+    
+    // Row 1
+    { dx: -2, dy: 1, color: '#3690ea' },
+    { dx: -1, dy: 1, color: '#3690ea' },
+    { dx: 0, dy: 1, color: '#3690ea' },
+    { dx: 1, dy: 1, color: '#3690ea' },
+    { dx: 2, dy: 1, color: '#3690ea' },
+    
+    // Row 2
+    { dx: -1, dy: 2, color: '#3690ea' },
+    { dx: 0, dy: 2, color: '#3690ea' },
+    { dx: 1, dy: 2, color: '#3690ea' },
+    { dx: 2, dy: 2, color: '#3690ea' },
+    
+    // Row 3
+    { dx: -1, dy: 3, color: '#3690ea' },
+    { dx: 0, dy: 3, color: '#3690ea' },
+    { dx: 1, dy: 3, color: '#3690ea' },
+    { dx: 2, dy: 3, color: '#3690ea' },
+    
+    // Row 4
+    { dx: -1, dy: 4, color: '#3690ea' },
+    { dx: 0, dy: 4, color: '#3690ea' },
+    { dx: 1, dy: 4, color: '#3690ea' },
+    
+    // Row 5
+    { dx: 0, dy: 5, color: '#3690ea' },
+    { dx: 1, dy: 5, color: '#3690ea' }
   ];
 
   // DOM Elements
@@ -643,6 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const voidCenter = { x: 30, y: 28 };
     const flagCenter = { x: 8, y: 28 };
     const usFlagCenter = { x: 33, y: 7 }; // American Flag in the top right corner
+    const mittenCenter = { x: 8, y: 8 }; // Michigan Mitten in the top left corner
 
     simIntervalId = setInterval(() => {
       // Pick a random player count based on config slider (fluctuate slightly)
@@ -655,33 +765,42 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const r = Math.random();
       
-      if (r < 0.30) {
-        // Faction 1: MSU Spartans (30% draw frequency)
+      if (r < 0.28) {
+        // Faction 1: MSU Spartans (28% draw frequency)
         drawFactionTemplate(botName, 'MSU Spartans', spartanCenter, SPARTAN_HELMET, ['#00a368', '#ffffff']);
-      } else if (r < 0.50) {
-        // Faction 2: US Patriots (20% draw frequency)
+      } else if (r < 0.46) {
+        // Faction 2: US Patriots (18% draw frequency)
         drawFactionTemplate(botName, 'US Patriots', usFlagCenter, AMERICAN_FLAG, ['#ff4500', '#ffffff', '#2450a4']);
       } else if (r < 0.62) {
-        // Faction 3: The Void (12% draw frequency - reduced & contained)
+        // Faction 3: Great Lakes Crew (16% draw frequency)
+        drawFactionTemplate(botName, 'GL Crew', mittenCenter, MICHIGAN_MITTEN, ['#3690ea', '#ffffff']);
+      } else if (r < 0.72) {
+        // Faction 4: The Void (10% draw frequency - highly contained)
         drawFactionTemplate(botName, 'The Void', voidCenter, VOID_TEMPLATE, ['#000000', '#811e9f']);
-      } else if (r < 0.80) {
-        // Faction 4: Gold Flag Union (18% draw frequency)
+      } else if (r < 0.86) {
+        // Faction 5: Gold Flag Union (14% draw frequency)
         drawFactionTemplate(botName, 'Gold Flag', flagCenter, GOLD_FLAG, ['#ffd635', '#ffffff', '#9c6926']);
       } else {
-        // Independent / Griefer / Chaotic noise (20% draw frequency)
+        // Independent / Griefer / Chaotic noise (14% draw frequency)
         const actionRand = Math.random();
-        const randX = Math.floor(Math.random() * GRID_SIZE);
-        const randY = Math.floor(Math.random() * GRID_SIZE);
-
+        
         if (actionRand < 0.08) {
           // Erase
+          const randX = Math.floor(Math.random() * GRID_SIZE);
+          const randY = Math.floor(Math.random() * GRID_SIZE);
           grid[randX][randY] = null;
           addLogEntry(botName, 'erased cell', { x: randX, y: randY });
         } else {
-          // Draw random pixel
-          const color = colors[Math.floor(Math.random() * colors.length)].hex;
-          grid[randX][randY] = color;
-          addLogEntry(botName, 'painted random pixel', { x: randX, y: randY });
+          // Draw 3 random pixels at once to fill the grid faster!
+          let lastCoord = null;
+          for (let i = 0; i < 3; i++) {
+            const randX = Math.floor(Math.random() * GRID_SIZE);
+            const randY = Math.floor(Math.random() * GRID_SIZE);
+            const color = colors[Math.floor(Math.random() * colors.length)].hex;
+            grid[randX][randY] = color;
+            lastCoord = { x: randX, y: randY };
+          }
+          addLogEntry(botName, 'painted random pixels', lastCoord);
         }
       }
 
@@ -734,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (factionName === 'The Void') actionMsg = `expanded The Void`;
       else if (factionName === 'Gold Flag') actionMsg = `raised Gold Flag`;
       else if (factionName === 'US Patriots') actionMsg = `stitched American Flag`;
+      else if (factionName === 'GL Crew') actionMsg = `mapped Michigan Mitten`;
       
       addLogEntry(botName, actionMsg, lastCoord);
     } else {
