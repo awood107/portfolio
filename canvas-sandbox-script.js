@@ -153,6 +153,96 @@ document.addEventListener('DOMContentLoaded', () => {
     { dx: 2, dy: 0, color: '#ffd635' }
   ];
 
+  const AMERICAN_FLAG = [
+    // Blue Canton (#2450a4) with stars (#ffffff)
+    { dx: -5, dy: -3, color: '#2450a4' },
+    { dx: -4, dy: -3, color: '#ffffff' }, // Star
+    { dx: -3, dy: -3, color: '#2450a4' },
+    { dx: -2, dy: -3, color: '#2450a4' },
+    
+    { dx: -5, dy: -2, color: '#2450a4' },
+    { dx: -4, dy: -2, color: '#2450a4' },
+    { dx: -3, dy: -2, color: '#ffffff' }, // Star
+    { dx: -2, dy: -2, color: '#2450a4' },
+    
+    { dx: -5, dy: -1, color: '#2450a4' },
+    { dx: -4, dy: -1, color: '#ffffff' }, // Star
+    { dx: -3, dy: -1, color: '#2450a4' },
+    { dx: -2, dy: -1, color: '#2450a4' },
+    
+    // Stripe 1 (Red #ff4500)
+    { dx: -1, dy: -3, color: '#ff4500' },
+    { dx: 0, dy: -3, color: '#ff4500' },
+    { dx: 1, dy: -3, color: '#ff4500' },
+    { dx: 2, dy: -3, color: '#ff4500' },
+    { dx: 3, dy: -3, color: '#ff4500' },
+    { dx: 4, dy: -3, color: '#ff4500' },
+    
+    // Stripe 2 (White #ffffff)
+    { dx: -1, dy: -2, color: '#ffffff' },
+    { dx: 0, dy: -2, color: '#ffffff' },
+    { dx: 1, dy: -2, color: '#ffffff' },
+    { dx: 2, dy: -2, color: '#ffffff' },
+    { dx: 3, dy: -2, color: '#ffffff' },
+    { dx: 4, dy: -2, color: '#ffffff' },
+    
+    // Stripe 3 (Red #ff4500)
+    { dx: -1, dy: -1, color: '#ff4500' },
+    { dx: 0, dy: -1, color: '#ff4500' },
+    { dx: 1, dy: -1, color: '#ff4500' },
+    { dx: 2, dy: -1, color: '#ff4500' },
+    { dx: 3, dy: -1, color: '#ff4500' },
+    { dx: 4, dy: -1, color: '#ff4500' },
+    
+    // Stripe 4 (White #ffffff)
+    { dx: -5, dy: 0, color: '#ffffff' },
+    { dx: -4, dy: 0, color: '#ffffff' },
+    { dx: -3, dy: 0, color: '#ffffff' },
+    { dx: -2, dy: 0, color: '#ffffff' },
+    { dx: -1, dy: 0, color: '#ffffff' },
+    { dx: 0, dy: 0, color: '#ffffff' },
+    { dx: 1, dy: 0, color: '#ffffff' },
+    { dx: 2, dy: 0, color: '#ffffff' },
+    { dx: 3, dy: 0, color: '#ffffff' },
+    { dx: 4, dy: 0, color: '#ffffff' },
+    
+    // Stripe 5 (Red #ff4500)
+    { dx: -5, dy: 1, color: '#ff4500' },
+    { dx: -4, dy: 1, color: '#ff4500' },
+    { dx: -3, dy: 1, color: '#ff4500' },
+    { dx: -2, dy: 1, color: '#ff4500' },
+    { dx: -1, dy: 1, color: '#ff4500' },
+    { dx: 0, dy: 1, color: '#ff4500' },
+    { dx: 1, dy: 1, color: '#ff4500' },
+    { dx: 2, dy: 1, color: '#ff4500' },
+    { dx: 3, dy: 1, color: '#ff4500' },
+    { dx: 4, dy: 1, color: '#ff4500' },
+    
+    // Stripe 6 (White #ffffff)
+    { dx: -5, dy: 2, color: '#ffffff' },
+    { dx: -4, dy: 2, color: '#ffffff' },
+    { dx: -3, dy: 2, color: '#ffffff' },
+    { dx: -2, dy: 2, color: '#ffffff' },
+    { dx: -1, dy: 2, color: '#ffffff' },
+    { dx: 0, dy: 2, color: '#ffffff' },
+    { dx: 1, dy: 2, color: '#ffffff' },
+    { dx: 2, dy: 2, color: '#ffffff' },
+    { dx: 3, dy: 2, color: '#ffffff' },
+    { dx: 4, dy: 2, color: '#ffffff' },
+    
+    // Stripe 7 (Red #ff4500)
+    { dx: -5, dy: 3, color: '#ff4500' },
+    { dx: -4, dy: 3, color: '#ff4500' },
+    { dx: -3, dy: 3, color: '#ff4500' },
+    { dx: -2, dy: 3, color: '#ff4500' },
+    { dx: -1, dy: 3, color: '#ff4500' },
+    { dx: 0, dy: 3, color: '#ff4500' },
+    { dx: 1, dy: 3, color: '#ff4500' },
+    { dx: 2, dy: 3, color: '#ff4500' },
+    { dx: 3, dy: 3, color: '#ff4500' },
+    { dx: 4, dy: 3, color: '#ff4500' }
+  ];
+
   // DOM Elements
   const canvas = document.getElementById('pixel-canvas');
   const ctx = canvas.getContext('2d');
@@ -546,15 +636,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Start Bot Draw intervals
    */
-  /**
-   * Start Bot Draw intervals
-   */
   function startSimulationLoop() {
     if (simIntervalId) clearInterval(simIntervalId);
 
     const spartanCenter = { x: 19, y: 16 };
     const voidCenter = { x: 30, y: 28 };
     const flagCenter = { x: 8, y: 28 };
+    const usFlagCenter = { x: 33, y: 7 }; // American Flag in the top right corner
 
     simIntervalId = setInterval(() => {
       // Pick a random player count based on config slider (fluctuate slightly)
@@ -567,17 +655,20 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const r = Math.random();
       
-      if (r < 0.35) {
-        // Faction 1: MSU Spartans (35% draw frequency)
+      if (r < 0.30) {
+        // Faction 1: MSU Spartans (30% draw frequency)
         drawFactionTemplate(botName, 'MSU Spartans', spartanCenter, SPARTAN_HELMET, ['#00a368', '#ffffff']);
-      } else if (r < 0.60) {
-        // Faction 2: The Void (25% draw frequency)
+      } else if (r < 0.50) {
+        // Faction 2: US Patriots (20% draw frequency)
+        drawFactionTemplate(botName, 'US Patriots', usFlagCenter, AMERICAN_FLAG, ['#ff4500', '#ffffff', '#2450a4']);
+      } else if (r < 0.62) {
+        // Faction 3: The Void (12% draw frequency - reduced & contained)
         drawFactionTemplate(botName, 'The Void', voidCenter, VOID_TEMPLATE, ['#000000', '#811e9f']);
-      } else if (r < 0.78) {
-        // Faction 3: Gold Flag Union (18% draw frequency)
+      } else if (r < 0.80) {
+        // Faction 4: Gold Flag Union (18% draw frequency)
         drawFactionTemplate(botName, 'Gold Flag', flagCenter, GOLD_FLAG, ['#ffd635', '#ffffff', '#9c6926']);
       } else {
-        // Independent / Griefer / Chaotic noise (22% draw frequency)
+        // Independent / Griefer / Chaotic noise (20% draw frequency)
         const actionRand = Math.random();
         const randX = Math.floor(Math.random() * GRID_SIZE);
         const randY = Math.floor(Math.random() * GRID_SIZE);
@@ -624,19 +715,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (mismatches.length > 0) {
-      // Draw/defend a mismatching pixel
-      const target = mismatches[Math.floor(Math.random() * mismatches.length)];
-      grid[target.x][target.y] = target.color;
+      // Draw/defend mismatching pixels - draw up to 2 pixels to build faster!
+      const countToDraw = Math.min(2, mismatches.length);
+      let lastCoord = null;
       
+      for (let i = 0; i < countToDraw; i++) {
+        // Recalculate mismatches list in case the first draw changed it
+        const currentMismatches = mismatches.filter(m => grid[m.x][m.y] !== m.color);
+        if (currentMismatches.length === 0) break;
+        
+        const target = currentMismatches[Math.floor(Math.random() * currentMismatches.length)];
+        grid[target.x][target.y] = target.color;
+        lastCoord = { x: target.x, y: target.y };
+      }
+
       let actionMsg = `defended ${factionName} template`;
       if (factionName === 'MSU Spartans') actionMsg = `painted Spartan Head pixel`;
       else if (factionName === 'The Void') actionMsg = `expanded The Void`;
       else if (factionName === 'Gold Flag') actionMsg = `raised Gold Flag`;
+      else if (factionName === 'US Patriots') actionMsg = `stitched American Flag`;
       
-      addLogEntry(botName, actionMsg, { x: target.x, y: target.y });
+      addLogEntry(botName, actionMsg, lastCoord);
     } else {
       // Template is perfect! Expand territory around the center
-      const maxRadius = factionName === 'The Void' ? 8 : 5;
+      // Void has a highly contained radius (only 4 pixels), others expand slightly more (5 pixels)
+      const maxRadius = factionName === 'The Void' ? 4 : 5;
       const randAngle = Math.random() * Math.PI * 2;
       const randDist = Math.floor(Math.random() * maxRadius) + 1;
       
