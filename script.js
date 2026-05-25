@@ -229,13 +229,13 @@ function initNetworkCanvas() {
     constructor() {
       this.x = Math.random() * width;
       this.y = Math.random() * height;
-      this.vx = (Math.random() - 0.5) * 0.45; // Faster baseline movement (was 0.22)
-      this.vy = (Math.random() - 0.5) * 0.45;
+      this.vx = (Math.random() - 0.5) * 0.32; // Calmed baseline movement (was 0.45)
+      this.vy = (Math.random() - 0.5) * 0.32;
       this.radius = Math.random() * 2.2 + 1.3;
     }
 
     update() {
-      // Steer towards mouse cursor (stronger attraction coefficient)
+      // Steer towards mouse cursor (calmed attraction coefficient, was 0.08)
       if (mouse.x !== null && mouse.y !== null) {
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
@@ -243,16 +243,16 @@ function initNetworkCanvas() {
         
         if (dist < mouse.radius) {
           const force = (mouse.radius - dist) / mouse.radius;
-          // Apply vector acceleration pull (faster steer rate, was 0.015)
-          this.vx += (dx / dist) * force * 0.08;
-          this.vy += (dy / dist) * force * 0.08;
+          // Apply vector acceleration pull (slightly damped steer rate)
+          this.vx += (dx / dist) * force * 0.05;
+          this.vy += (dy / dist) * force * 0.05;
         }
       }
 
-      // Maintain velocity bounds to keep them moving dynamically with a cap
+      // Maintain velocity bounds to keep them moving dynamically but calmly
       const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-      const maxSpeed = 1.6; // Increased speed cap for visible attraction (was 0.55)
-      const minSpeed = 0.35; // Slower min speed threshold to keep moving (was 0.12)
+      const maxSpeed = 1.15; // Calmed speed cap (was 1.6)
+      const minSpeed = 0.22; // Slower min speed boundary (was 0.35)
 
       if (speed > maxSpeed) {
         this.vx = (this.vx / speed) * maxSpeed;
@@ -273,7 +273,7 @@ function initNetworkCanvas() {
     draw() {
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(248, 250, 252, 0.8)'; // Warm slate white (was 0.75)
+      ctx.fillStyle = 'rgba(248, 250, 252, 0.8)'; // Warm slate white
       ctx.fill();
     }
   }
