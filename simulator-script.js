@@ -50,6 +50,7 @@ function initLboMonteCarlo() {
   const ctx = canvas.getContext('2d');
 
   let chartInstance = null;
+  let simulationFrameId = null;
 
   // Box-Muller random normal generator
   function boxMuller(mean, stdDev) {
@@ -91,114 +92,139 @@ function initLboMonteCarlo() {
     valMarginSd.textContent = `${(marginSd * 100).toFixed(2)}%`;
     valRateSd.textContent = `${(rateSd * 100).toFixed(2)}%`;
 
-    const runs = 2000;
+    const totalRuns = 2000;
+    const batchSize = 100;
+    let currentRuns = 0;
     const irrs = [];
     const moics = [];
 
     const initialDebt = ev * (debtPct / 100);
     const initialEquity = ev - initialDebt;
-
-    // Entry Revenue proxy (using marginMean as base)
     const entryRev = initialEbitda / marginMean;
 
-    // 3. Monte Carlo Loop
-    for (let i = 0; i < runs; i++) {
-      // Sample variables for this run
-      const sampledGrowth = boxMuller(revMean, revSd);
-      const sampledExitMult = Math.max(2.0, boxMuller(multMean, multSd)); // Floor at 2.0x
-      const sampledMargin = Math.max(0.02, Math.min(0.85, boxMuller(marginMean, marginSd))); // Clamp margin
-      const sampledInterestRate = Math.max(0.01, boxMuller(rateMean, rateSd)); // Floor at 1%
-
-      // Run 5-Year Projections
-      let currentRev = entryRev;
-      let accumulatedCash = 0;
-      const annualInterest = initialDebt * sampledInterestRate;
-
-      for (let yr = 1; yr <= 5; yr++) {
-        currentRev = currentRev * (1 + sampledGrowth);
-        const currentEbitda = currentRev * sampledMargin;
-        
-        // CapEx assumed at 15% of EBITDA
-        const currentCapex = currentEbitda * 0.15;
-        const currentEbt = currentEbitda - annualInterest - currentCapex;
-        const currentTaxes = currentEbt > 0 ? currentEbt * 0.25 : 0; // 25% Tax Rate
-        
-        const currentFcf = currentEbitda - annualInterest - currentCapex - currentTaxes;
-        accumulatedCash += currentFcf;
-      }
-
-      const finalEbitda = currentRev * sampledMargin;
-      const exitEv = finalEbitda * sampledExitMult;
-      
-      // Net exit equity = Exit Enterprise Value - Debt + Cash
-      const exitEquity = Math.max(0, exitEv - initialDebt + accumulatedCash);
-      
-      const moic = exitEquity / initialEquity;
-      const irr = moic > 0 ? Math.pow(moic, 0.2) - 1 : -1.0; // Year 5 IRR
-
-      irrs.push(irr);
-      moics.push(moic);
+    // Cancel any active animation loops
+    if (simulationFrameId) {
+      cancelAnimationFrame(simulationFrameId);
     }
 
-    // 4. Calculate Summary Statistics
-    irrs.sort((a, b) => a - b);
-    moics.sort((a, b) => a - b);
-
-    // Median (50th percentile)
-    const medianIrr = irrs[Math.floor(runs * 0.5)];
-    // Average MoIC
-    const averageMoic = moics.reduce((sum, val) => sum + val, 0) / runs;
-
-    // Probability of capital loss (IRR < 0%)
-    const lossRuns = irrs.filter(val => val < 0).length;
-    const lossProb = (lossRuns / runs) * 100;
-
-    // Probability of hitting target (IRR >= 20%)
-    const targetRuns = irrs.filter(val => val >= 0.20).length;
-    const targetProb = (targetRuns / runs) * 100;
-
-    // Render KPIs
-    kpiMedianIrr.textContent = `${(medianIrr * 100).toFixed(1)}%`;
-    kpiExpectedMoic.textContent = `${averageMoic.toFixed(2)}x`;
-    kpiLossProb.textContent = `${lossProb.toFixed(1)}%`;
-    kpiTargetProb.textContent = `${targetProb.toFixed(1)}%`;
-
-    // Dynamic warning colors for loss probability
-    if (lossProb > 15) {
-      kpiLossProb.style.color = '#ef4444'; // Red alert
-    } else if (lossProb > 5) {
-      kpiLossProb.style.color = '#f59e0b'; // Yellow caution
-    } else {
-      kpiLossProb.style.color = '#10b981'; // Green safe
-    }
-
-    // 5. Aggregate Histogram Data
-    // Define 25 buckets from -20% to +80% (4% size)
+    // Set up bucket limits for Chart.js
     const bucketSize = 0.04;
     const numBuckets = 26;
     const minVal = -0.20;
-    const bucketCounts = new Array(numBuckets).fill(0);
     const bucketLabels = [];
-
-    // Pre-generate bucket labels (e.g. "-16%", "0%", "24%")
     for (let j = 0; j < numBuckets; j++) {
       const centerVal = minVal + (j * bucketSize);
       bucketLabels.push(`${(centerVal * 100).toFixed(0)}%`);
     }
 
-    irrs.forEach(irr => {
-      let index = Math.floor((irr - minVal) / bucketSize);
-      if (index < 0) {
-        bucketCounts[0]++; // Put in the lowest bucket
-      } else if (index >= numBuckets) {
-        bucketCounts[numBuckets - 1]++; // Put in the highest bucket
-      } else {
-        bucketCounts[index]++;
-      }
-    });
+    const progressLabel = document.getElementById('sim-progress');
 
-    // 6. Draw Chart
-    renderHistogram(bucketLabels, bucketCounts);
+    function executeBatch() {
+      const limit = Math.min(currentRuns + batchSize, totalRuns);
+      
+      for (let i = currentRuns; i < limit; i++) {
+        // Sample variables for this run
+        const sampledGrowth = boxMuller(revMean, revSd);
+        const sampledExitMult = Math.max(2.0, boxMuller(multMean, multSd)); // Floor at 2.0x
+        const sampledMargin = Math.max(0.02, Math.min(0.85, boxMuller(marginMean, marginSd))); // Clamp margin
+        const sampledInterestRate = Math.max(0.01, boxMuller(rateMean, rateSd)); // Floor at 1%
+
+        // Run 5-Year Projections
+        let currentRev = entryRev;
+        let accumulatedCash = 0;
+        const annualInterest = initialDebt * sampledInterestRate;
+
+        for (let yr = 1; yr <= 5; yr++) {
+          currentRev = currentRev * (1 + sampledGrowth);
+          const currentEbitda = currentRev * sampledMargin;
+          
+          // CapEx assumed at 15% of EBITDA
+          const currentCapex = currentEbitda * 0.15;
+          const currentEbt = currentEbitda - annualInterest - currentCapex;
+          const currentTaxes = currentEbt > 0 ? currentEbt * 0.25 : 0; // 25% Tax Rate
+          
+          const currentFcf = currentEbitda - annualInterest - currentCapex - currentTaxes;
+          accumulatedCash += currentFcf;
+        }
+
+        const finalEbitda = currentRev * sampledMargin;
+        const exitEv = finalEbitda * sampledExitMult;
+        
+        // Net exit equity = Exit Enterprise Value - Debt + Cash
+        const exitEquity = Math.max(0, exitEv - initialDebt + accumulatedCash);
+        
+        const moic = exitEquity / initialEquity;
+        const irr = moic > 0 ? Math.pow(moic, 0.2) - 1 : -1.0; // Year 5 IRR
+
+        irrs.push(irr);
+        moics.push(moic);
+      }
+
+      currentRuns = limit;
+
+      // Update progress title
+      if (progressLabel) {
+        progressLabel.textContent = `(${currentRuns.toLocaleString()} / ${totalRuns.toLocaleString()} Runs)`;
+      }
+
+      // Sort copies of arrays to update KPIs progressively
+      const sortedIrrs = [...irrs].sort((a, b) => a - b);
+      const sortedMoics = [...moics].sort((a, b) => a - b);
+
+      // Median (50th percentile)
+      const medianIrr = sortedIrrs[Math.floor(sortedIrrs.length * 0.5)];
+      // Average MoIC
+      const averageMoic = sortedMoics.reduce((sum, val) => sum + val, 0) / sortedMoics.length;
+
+      // Probability of capital loss (IRR < 0%)
+      const lossRuns = sortedIrrs.filter(val => val < 0).length;
+      const lossProb = (lossRuns / sortedIrrs.length) * 100;
+
+      // Probability of hitting target (IRR >= 20%)
+      const targetRuns = sortedIrrs.filter(val => val >= 0.20).length;
+      const targetProb = (targetRuns / sortedIrrs.length) * 100;
+
+      // Render KPIs
+      kpiMedianIrr.textContent = `${(medianIrr * 100).toFixed(1)}%`;
+      kpiExpectedMoic.textContent = `${averageMoic.toFixed(2)}x`;
+      kpiLossProb.textContent = `${lossProb.toFixed(1)}%`;
+      kpiTargetProb.textContent = `${targetProb.toFixed(1)}%`;
+
+      // Dynamic warning colors for loss probability
+      if (lossProb > 15) {
+        kpiLossProb.style.color = '#ef4444'; // Red alert
+      } else if (lossProb > 5) {
+        kpiLossProb.style.color = '#f59e0b'; // Yellow caution
+      } else {
+        kpiLossProb.style.color = '#10b981'; // Green safe
+      }
+
+      // Re-bucket current data
+      const bucketCounts = new Array(numBuckets).fill(0);
+      irrs.forEach(irr => {
+        let index = Math.floor((irr - minVal) / bucketSize);
+        if (index < 0) {
+          bucketCounts[0]++; // Put in the lowest bucket
+        } else if (index >= numBuckets) {
+          bucketCounts[numBuckets - 1]++; // Put in the highest bucket
+        } else {
+          bucketCounts[index]++;
+        }
+      });
+
+      // Update chart histogram
+      renderHistogram(bucketLabels, bucketCounts);
+
+      // Queue next batch if not completed
+      if (currentRuns < totalRuns) {
+        simulationFrameId = requestAnimationFrame(executeBatch);
+      } else {
+        simulationFrameId = null;
+      }
+    }
+
+    // Start progressive execution
+    executeBatch();
   }
 
   function renderHistogram(labels, data) {
