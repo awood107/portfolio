@@ -413,6 +413,7 @@ function initProjectModals() {
   const dashboardLink = document.getElementById('link-project-dashboard');
   const amortizationLink = document.getElementById('link-project-amortization');
   const etlLink = document.getElementById('link-project-etl');
+  const placeLink = document.getElementById('link-tech-place');
 
   if (!modal || !modalClose || !modalBody) return;
 
@@ -501,6 +502,24 @@ function initProjectModals() {
           <p>Built with Python, utilizing SQLAlchemy for ETL connections and custom TSQL stored procedures for relational mapping controls.</p>
         </div>
       `
+    },
+    place: {
+      title: "Cooperative Pixel Canvas Sandbox",
+      content: `
+        <div class="modal-title">Cooperative Pixel Canvas Sandbox</div>
+        <div class="modal-text">
+          <p><strong>Overview:</strong> An interactive, real-time client-side application simulating Reddit's cooperative pixel board (r/place) inside a premium, dark-mode sandbox environment.</p>
+          <h4>Key Technical Subsystems:</h4>
+          <ul>
+            <li><strong>HTML5 Canvas drawing interface:</strong> Translates mouse coordinates directly to grid cell updates with sub-millisecond drawing latency and continuous dragging capability.</li>
+            <li><strong>Cooperative Simulation Loops:</strong> Spawns asynchronous drawing tasks simulating virtual concurrency. Multiple "AI players" sketch patterns, shapes, and random noise over time, featuring adjustable speed controls.</li>
+            <li><strong>BFS Flood-Fill algorithm:</strong> Implements a robust flood-fill (Breadth-First Search queue) algorithm for the bucket tool, allowing contiguous grid regions to change colors dynamically.</li>
+            <li><strong>Live Data Analytics:</strong> Automatically tracks colored pixel quantities, grid coverage density, and renders live horizontal stats graphs showing color usage.</li>
+          </ul>
+          <h4>Technical Architecture:</h4>
+          <p>Constructed in HTML5 and Vanilla ES6 JavaScript, utilizing HTML5 Canvas API, LocalStorage state serialization, and custom SVG dashboard indicators.</p>
+        </div>
+      `
     }
   };
 
@@ -552,6 +571,13 @@ function initProjectModals() {
     etlLink.addEventListener('click', (e) => {
       e.preventDefault();
       openModal('etl');
+    });
+  }
+
+  if (placeLink) {
+    placeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('place');
     });
   }
 

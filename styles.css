@@ -1516,7 +1516,7 @@ footer {
 
 .tech-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.9fr 0.9fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px;
 }
 
@@ -1559,6 +1559,7 @@ footer {
 }
 
 .tech-card.featured {
+  grid-column: 1 / -1;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
   border-color: rgba(var(--color-accent-rgb), 0.2);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
