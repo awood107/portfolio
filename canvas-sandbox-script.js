@@ -11,27 +11,31 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // State
   let grid = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
-  let selectedColor = '#c5a880'; // Default champagne gold
+  let selectedColor = '#ff4500'; // Default Orange-Red (r/place Red)
   let activeTool = 'pencil'; // pencil, bucket, eraser
   let isDrawing = false;
   let simIntervalId = null;
   let simulatedUsersCount = 6;
   let simSpeedMs = 700; // Medium
 
-  // Color Palette definition
+  // Color Palette definition (Reddit r/place 16-color palette)
   const colors = [
-    { name: 'Champagne Gold', hex: '#c5a880' },
-    { name: 'Electric Indigo', hex: '#6366f1' },
-    { name: 'Emerald Green', hex: '#10b981' },
-    { name: 'Crimson Rose', hex: '#f43f5e' },
-    { name: 'Sky Blue', hex: '#0ea5e9' },
-    { name: 'Pure White', hex: '#f8fafc' },
-    { name: 'Deep Amber', hex: '#f59e0b' },
-    { name: 'Soft Purple', hex: '#a855f7' },
-    { name: 'Slate Gray', hex: '#475569' },
-    { name: 'Charcoal Dark', hex: '#1e293b' },
-    { name: 'Coral Orange', hex: '#f97316' },
-    { name: 'Hot Pink', hex: '#ec4899' }
+    { name: 'Red', hex: '#ff4500' },
+    { name: 'Orange', hex: '#ff8700' },
+    { name: 'Yellow', hex: '#ffd635' },
+    { name: 'Dark Green', hex: '#00a368' },
+    { name: 'Light Green', hex: '#7eed56' },
+    { name: 'Dark Blue', hex: '#2450a4' },
+    { name: 'Blue', hex: '#3690ea' },
+    { name: 'Light Blue', hex: '#51e9f4' },
+    { name: 'Dark Purple', hex: '#811e9f' },
+    { name: 'Magenta', hex: '#b44ac0' },
+    { name: 'Pink', hex: '#ff99aa' },
+    { name: 'Brown', hex: '#9c6926' },
+    { name: 'Black', hex: '#000000' },
+    { name: 'Gray', hex: '#898d90' },
+    { name: 'Light Gray', hex: '#d4d7d9' },
+    { name: 'White', hex: '#ffffff' }
   ];
 
   // Simulated bot usernames for cooperative mode
@@ -39,6 +43,114 @@ document.addEventListener('DOMContentLoaded', () => {
     'BroadStreetPainter', 'SpartanPixel', 'FinanceQuant', 'GridBuilder', 
     'PlaceExplorer', 'ColorBot', 'NodeCoder', 'YieldMaster', 'MergerStrategist',
     'SQLSlicer', 'M2Moneypit', 'CapRateCrusader', 'LBO_Monte', 'BufferBull', 'AlphaChaser'
+  ];
+
+  // Faction template coordinate offsets relative to a center point
+  const SPARTAN_HELMET = [
+    // Plume (Green: #00a368)
+    { dx: 0, dy: -5, color: '#00a368' },
+    { dx: -1, dy: -5, color: '#00a368' },
+    { dx: 1, dy: -5, color: '#00a368' },
+    { dx: -2, dy: -4, color: '#00a368' },
+    { dx: -1, dy: -4, color: '#00a368' },
+    { dx: 0, dy: -4, color: '#00a368' },
+    { dx: 1, dy: -4, color: '#00a368' },
+    { dx: 2, dy: -4, color: '#00a368' },
+    { dx: -3, dy: -3, color: '#00a368' },
+    { dx: -2, dy: -3, color: '#00a368' },
+    { dx: -1, dy: -3, color: '#00a368' },
+    { dx: 0, dy: -3, color: '#00a368' },
+    { dx: 1, dy: -3, color: '#00a368' },
+    { dx: 2, dy: -3, color: '#00a368' },
+    { dx: 3, dy: -3, color: '#00a368' },
+    
+    // Helmet Body (White: #ffffff)
+    { dx: -2, dy: -2, color: '#ffffff' },
+    { dx: -1, dy: -2, color: '#ffffff' },
+    { dx: 0, dy: -2, color: '#ffffff' },
+    { dx: 1, dy: -2, color: '#ffffff' },
+    { dx: 2, dy: -2, color: '#ffffff' },
+    
+    { dx: -3, dy: -1, color: '#ffffff' },
+    { dx: -2, dy: -1, color: '#ffffff' },
+    { dx: -1, dy: -1, color: '#ffffff' },
+    { dx: 0, dy: -1, color: '#ffffff' },
+    { dx: 1, dy: -1, color: '#ffffff' },
+    { dx: 2, dy: -1, color: '#ffffff' },
+    { dx: 3, dy: -1, color: '#ffffff' },
+    
+    { dx: -3, dy: 0, color: '#ffffff' },
+    { dx: -2, dy: 0, color: '#ffffff' }, // eye slot (dx -1 is empty)
+    { dx: 0, dy: 0, color: '#ffffff' },  // nose guard
+    { dx: 2, dy: 0, color: '#ffffff' },  // eye slot (dx 1 is empty)
+    { dx: 3, dy: 0, color: '#ffffff' },
+    
+    { dx: -3, dy: 1, color: '#ffffff' },
+    { dx: -2, dy: 1, color: '#ffffff' },
+    { dx: 0, dy: 1, color: '#ffffff' },  // nose guard
+    { dx: 2, dy: 1, color: '#ffffff' },
+    { dx: 3, dy: 1, color: '#ffffff' },
+    
+    { dx: -3, dy: 2, color: '#ffffff' },
+    { dx: 0, dy: 2, color: '#ffffff' },  // nose guard
+    { dx: 3, dy: 2, color: '#ffffff' }
+  ];
+
+  const VOID_TEMPLATE = [
+    // Core (Black #000000)
+    { dx: 0, dy: 0, color: '#000000' },
+    { dx: 1, dy: 0, color: '#000000' },
+    { dx: -1, dy: 0, color: '#000000' },
+    { dx: 0, dy: 1, color: '#000000' },
+    { dx: 0, dy: -1, color: '#000000' },
+    { dx: 1, dy: 1, color: '#000000' },
+    { dx: -1, dy: 1, color: '#000000' },
+    { dx: 1, dy: -1, color: '#000000' },
+    { dx: -1, dy: -1, color: '#000000' },
+    
+    // Outer glow (Purple #811e9f)
+    { dx: 2, dy: 0, color: '#811e9f' },
+    { dx: -2, dy: 0, color: '#811e9f' },
+    { dx: 0, dy: 2, color: '#811e9f' },
+    { dx: 0, dy: -2, color: '#811e9f' },
+    { dx: 2, dy: 1, color: '#811e9f' },
+    { dx: -2, dy: 1, color: '#811e9f' },
+    { dx: 2, dy: -1, color: '#811e9f' },
+    { dx: -2, dy: -1, color: '#811e9f' },
+    { dx: 1, dy: 2, color: '#811e9f' },
+    { dx: 1, dy: -2, color: '#811e9f' },
+    { dx: -1, dy: 2, color: '#811e9f' },
+    { dx: -1, dy: -2, color: '#811e9f' }
+  ];
+
+  const GOLD_FLAG = [
+    // Flag pole (Brown #9c6926)
+    { dx: -3, dy: -2, color: '#9c6926' },
+    { dx: -3, dy: -1, color: '#9c6926' },
+    { dx: -3, dy: 0, color: '#9c6926' },
+    { dx: -3, dy: 1, color: '#9c6926' },
+    { dx: -3, dy: 2, color: '#9c6926' },
+    { dx: -3, dy: 3, color: '#9c6926' },
+    { dx: -3, dy: 4, color: '#9c6926' },
+    
+    // Flag fabric (Yellow/Gold #ffd635 and White emblem #ffffff)
+    { dx: -2, dy: -2, color: '#ffd635' },
+    { dx: -1, dy: -2, color: '#ffd635' },
+    { dx: 0, dy: -2, color: '#ffd635' },
+    { dx: 1, dy: -2, color: '#ffd635' },
+    { dx: 2, dy: -2, color: '#ffd635' },
+    
+    { dx: -2, dy: -1, color: '#ffd635' },
+    { dx: -1, dy: -1, color: '#ffffff' }, // Emblem
+    { dx: 0, dy: -1, color: '#ffffff' },  // Emblem
+    { dx: 1, dy: -1, color: '#ffd635' },
+    { dx: 2, dy: -1, color: '#ffd635' },
+    
+    { dx: -2, dy: 0, color: '#ffd635' },
+    { dx: -1, dy: 0, color: '#ffd635' },
+    { dx: 0, dy: 0, color: '#ffd635' },
+    { dx: 1, dy: 0, color: '#ffd635' },
+    { dx: 2, dy: 0, color: '#ffd635' }
   ];
 
   // DOM Elements
@@ -434,8 +546,15 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Start Bot Draw intervals
    */
+  /**
+   * Start Bot Draw intervals
+   */
   function startSimulationLoop() {
     if (simIntervalId) clearInterval(simIntervalId);
+
+    const spartanCenter = { x: 19, y: 16 };
+    const voidCenter = { x: 30, y: 28 };
+    const flagCenter = { x: 8, y: 28 };
 
     simIntervalId = setInterval(() => {
       // Pick a random player count based on config slider (fluctuate slightly)
@@ -446,20 +565,33 @@ document.addEventListener('DOMContentLoaded', () => {
       // Select random player
       const botName = botNames[Math.floor(Math.random() * botNames.length)];
       
-      // Perform draw (pencil edit or occasionally erase)
-      const actionRand = Math.random();
-      const randX = Math.floor(Math.random() * GRID_SIZE);
-      const randY = Math.floor(Math.random() * GRID_SIZE);
-
-      if (actionRand < 0.06) {
-        // 6% chance to erase
-        grid[randX][randY] = null;
-        addLogEntry(botName, 'erased cell', { x: randX, y: randY });
+      const r = Math.random();
+      
+      if (r < 0.35) {
+        // Faction 1: MSU Spartans (35% draw frequency)
+        drawFactionTemplate(botName, 'MSU Spartans', spartanCenter, SPARTAN_HELMET, ['#00a368', '#ffffff']);
+      } else if (r < 0.60) {
+        // Faction 2: The Void (25% draw frequency)
+        drawFactionTemplate(botName, 'The Void', voidCenter, VOID_TEMPLATE, ['#000000', '#811e9f']);
+      } else if (r < 0.78) {
+        // Faction 3: Gold Flag Union (18% draw frequency)
+        drawFactionTemplate(botName, 'Gold Flag', flagCenter, GOLD_FLAG, ['#ffd635', '#ffffff', '#9c6926']);
       } else {
-        // 94% chance to draw single pixel
-        const color = colors[Math.floor(Math.random() * colors.length)].hex;
-        grid[randX][randY] = color;
-        addLogEntry(botName, 'painted pixel', { x: randX, y: randY });
+        // Independent / Griefer / Chaotic noise (22% draw frequency)
+        const actionRand = Math.random();
+        const randX = Math.floor(Math.random() * GRID_SIZE);
+        const randY = Math.floor(Math.random() * GRID_SIZE);
+
+        if (actionRand < 0.08) {
+          // Erase
+          grid[randX][randY] = null;
+          addLogEntry(botName, 'erased cell', { x: randX, y: randY });
+        } else {
+          // Draw random pixel
+          const color = colors[Math.floor(Math.random() * colors.length)].hex;
+          grid[randX][randY] = color;
+          addLogEntry(botName, 'painted random pixel', { x: randX, y: randY });
+        }
       }
 
       drawGrid();
@@ -471,6 +603,57 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
     }, simSpeedMs);
+  }
+
+  /**
+   * Helper function for bot faction drawing behavior
+   */
+  function drawFactionTemplate(botName, factionName, center, template, expansionColors) {
+    // 1. Gather all pixels in the template that don't match their target color
+    const mismatches = [];
+    
+    template.forEach(pixel => {
+      const px = center.x + pixel.dx;
+      const py = center.y + pixel.dy;
+      
+      if (px >= 0 && px < GRID_SIZE && py >= 0 && py < GRID_SIZE) {
+        if (grid[px][py] !== pixel.color) {
+          mismatches.push({ x: px, y: py, color: pixel.color });
+        }
+      }
+    });
+
+    if (mismatches.length > 0) {
+      // Draw/defend a mismatching pixel
+      const target = mismatches[Math.floor(Math.random() * mismatches.length)];
+      grid[target.x][target.y] = target.color;
+      
+      let actionMsg = `defended ${factionName} template`;
+      if (factionName === 'MSU Spartans') actionMsg = `painted Spartan Head pixel`;
+      else if (factionName === 'The Void') actionMsg = `expanded The Void`;
+      else if (factionName === 'Gold Flag') actionMsg = `raised Gold Flag`;
+      
+      addLogEntry(botName, actionMsg, { x: target.x, y: target.y });
+    } else {
+      // Template is perfect! Expand territory around the center
+      const maxRadius = factionName === 'The Void' ? 8 : 5;
+      const randAngle = Math.random() * Math.PI * 2;
+      const randDist = Math.floor(Math.random() * maxRadius) + 1;
+      
+      const ex = Math.round(center.x + Math.cos(randAngle) * randDist);
+      const ey = Math.round(center.y + Math.sin(randAngle) * randDist);
+      
+      if (ex >= 0 && ex < GRID_SIZE && ey >= 0 && ey < GRID_SIZE) {
+        // Expand using one of the faction colors
+        const color = expansionColors[Math.floor(Math.random() * expansionColors.length)];
+        grid[ex][ey] = color;
+        
+        let actionMsg = `expanded ${factionName} territory`;
+        if (factionName === 'The Void') actionMsg = `consumed cell for The Void`;
+        
+        addLogEntry(botName, actionMsg, { x: ex, y: ey });
+      }
+    }
   }
 
   function stopSimulationLoop() {
