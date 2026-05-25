@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AJ Wood - Interactive LBO Monte Carlo Yield Simulator. Model private equity investment returns, IRR distributions, and capital loss probabilities.">
+  <meta name="author" content="AJ Wood">
+  <title>AJ Wood | LBO Monte Carlo Yield Simulator</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="assets/logo.png" type="image/png">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-body" style="background-color: var(--bg-primary);">
+
+  <!-- Dashboard/Simulator Container -->
+  <main class="dashboard-container">
+    
+    <!-- Top Header -->
+    <header class="dashboard-nav-header" style="position: static; height: auto; border: none; background: transparent; padding: 20px 0; margin-bottom: 20px;">
+      <a href="index.html#tech-work" class="back-link" style="text-decoration: none; color: var(--color-accent); font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Portfolio
+      </a>
+    </header>
+
+    <div class="dashboard-header" style="margin-bottom: 40px;">
+      <span class="section-tag" style="display: block; margin-bottom: 8px;">Live Web Application</span>
+      <h1 class="section-title" style="font-size: 2.8rem; margin-bottom: 12px;">LBO Monte Carlo Yield Simulator</h1>
+      <p style="color: var(--text-secondary); max-width: 800px; font-size: 1.1rem; line-height: 1.6;">
+        Stress test Leveraged Buyout (LBO) yields using client-side stochastic modeling. This calculator runs <strong>2,000 projection paths</strong> in real-time, sampling key growth rates, multiples, and debt costs from normal distributions to compile returns frequency curves.
+      </p>
+    </div>
+
+    <!-- KPI Metric Cards Grid -->
+    <div class="kpi-grid">
+      <!-- KPI 1 -->
+      <div class="kpi-card">
+        <h3>Median IRR</h3>
+        <div class="kpi-number" id="kpi-median-irr" style="color: var(--color-accent);">21.4%</div>
+        <div class="kpi-change neutral">50th Percentile Return</div>
+      </div>
+      <!-- KPI 2 -->
+      <div class="kpi-card">
+        <h3>Expected MoIC</h3>
+        <div class="kpi-number" id="kpi-expected-moic">2.35x</div>
+        <div class="kpi-change neutral">Multiple on Capital</div>
+      </div>
+      <!-- KPI 3 -->
+      <div class="kpi-card">
+        <h3>Downside Probability</h3>
+        <div class="kpi-number" id="kpi-loss-prob" style="color: #ef4444;">2.3%</div>
+        <div class="kpi-change negative">IRR < 0% (Capital Loss)</div>
+      </div>
+      <!-- KPI 4 -->
+      <div class="kpi-card highlight">
+        <h3>Target Achievement</h3>
+        <div class="kpi-number" id="kpi-target-prob" style="color: #10b981;">58.5%</div>
+        <div class="kpi-change positive">IRR >= 20.0% (PE Threshold)</div>
+      </div>
+    </div>
+
+    <!-- Main Simulator Grid -->
+    <div class="main-dashboard-grid" style="grid-template-columns: 1.2fr 0.8fr;">
+      
+      <!-- Left Column: Interactive Visualizations -->
+      <div class="dashboard-visuals">
+        <!-- Chart Panel -->
+        <div class="chart-panel" style="margin-bottom: 0; height: 100%; display: flex; flex-direction: column;">
+          <h3>IRR Probability Distribution (2,000 Runs)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+            A real-time generated frequency histogram. The gold curve models the distribution of 5-year internal rate of returns (IRR) across all sampled macroeconomic outcomes.
+          </p>
+          <div style="position: relative; flex-grow: 1; min-height: 400px; width: 100%;">
+            <canvas id="chart-simulator"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Monte Carlo Controls -->
+      <div class="dashboard-sidebar">
+        <div class="simulator-panel" style="position: static; box-shadow: none;">
+          <h3 class="simulator-title" style="font-family: var(--font-display); font-size: 1.4rem; color: var(--color-accent); margin-bottom: 24px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            Stochastic Model Assumptions
+          </h3>
+          
+          <div class="simulator-inputs">
+            
+            <h4 style="font-family: var(--font-display); font-size: 1rem; color: var(--text-primary); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+              LBO Structure
+            </h4>
+
+            <!-- EV Slider -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-ev">Enterprise Value (EV)</label>
+                <span id="val-ev">$10.0M</span>
+              </div>
+              <input type="range" id="slide-ev" min="2" max="30" step="0.5" value="10">
+            </div>
+
+            <!-- Initial EBITDA Slider -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-ebitda">Initial EBITDA</label>
+                <span id="val-ebitda">$1.8M</span>
+              </div>
+              <input type="range" id="slide-ebitda" min="0.3" max="5" step="0.1" value="1.8">
+            </div>
+
+            <!-- Debt Proportion Slider -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-debt">Leverage (Debt Funding %)</label>
+                <span id="val-debt">60%</span>
+              </div>
+              <input type="range" id="slide-debt" min="10" max="80" step="5" value="60">
+            </div>
+
+            <h4 style="font-family: var(--font-display); font-size: 1rem; color: var(--text-primary); margin-top: 30px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+              Mean Growth & Value Parameters
+            </h4>
+
+            <!-- Revenue Growth (Mean) -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-rev-mean">Revenue Growth (Mean)</label>
+                <span id="val-rev-mean">6.0%</span>
+              </div>
+              <input type="range" id="slide-rev-mean" min="-5.0" max="25.0" step="0.5" value="6">
+            </div>
+
+            <!-- Exit Multiple (Mean) -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-mult-mean">Exit Multiple (Mean)</label>
+                <span id="val-mult-mean">7.0x</span>
+              </div>
+              <input type="range" id="slide-mult-mean" min="3.0" max="15.0" step="0.25" value="7">
+            </div>
+
+            <!-- Exit EBITDA Margin (Mean) -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-margin-mean">EBITDA Margin (Mean)</label>
+                <span id="val-margin-mean">18.0%</span>
+              </div>
+              <input type="range" id="slide-margin-mean" min="5" max="40" step="0.5" value="18">
+            </div>
+
+            <!-- Interest Rate (Mean) -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-rate-mean">Interest Rate (Mean)</label>
+                <span id="val-rate-mean">6.5%</span>
+              </div>
+              <input type="range" id="slide-rate-mean" min="2.0" max="14.0" step="0.25" value="6.5">
+            </div>
+
+            <h4 style="font-family: var(--font-display); font-size: 1rem; color: var(--text-primary); margin-top: 30px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+              Volatility & Standard Deviations
+            </h4>
+
+            <!-- Revenue Growth Volatility -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-rev-sd">Revenue Growth Volatility</label>
+                <span id="val-rev-sd">3.0%</span>
+              </div>
+              <input type="range" id="slide-rev-sd" min="0.0" max="10.0" step="0.25" value="3">
+            </div>
+
+            <!-- Exit Multiple Volatility -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-mult-sd">Exit Multiple Volatility</label>
+                <span id="val-mult-sd">1.0x</span>
+              </div>
+              <input type="range" id="slide-mult-sd" min="0.0" max="3.0" step="0.1" value="1">
+            </div>
+
+            <!-- Exit EBITDA Margin Volatility -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-margin-sd">EBITDA Margin Volatility</label>
+                <span id="val-margin-sd">2.0%</span>
+              </div>
+              <input type="range" id="slide-margin-sd" min="0.0" max="8.0" step="0.25" value="2">
+            </div>
+
+            <!-- Interest Rate Volatility -->
+            <div class="slider-group">
+              <div class="slider-label">
+                <label for="slide-rate-sd">Interest Rate Volatility</label>
+                <span id="val-rate-sd">1.0%</span>
+              </div>
+              <input type="range" id="slide-rate-sd" min="0.0" max="3.0" step="0.1" value="1">
+            </div>
+
+          </div>
+          
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JavaScript -->
+  <script src="simulator-script.js"></script>
+</body>
+</html>
